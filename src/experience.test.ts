@@ -33,7 +33,7 @@ describe('저장과 비교 메모',()=>{
   });
   it('이전 저장을 이전하면서 모든 후보를 보관하고 비교만 3명으로 제한한다',()=>{
     const s=readSession(JSON.stringify({version:2,brief,selected:['C0001','C0001','C0002','C0003','C0004']}));
-    expect(s?.version).toBe(3);expect(s?.selected).toEqual(['C0001','C0002','C0003','C0004']);expect(s?.compared).toEqual(['C0001','C0002','C0003']);expect(s?.brief).toEqual(brief);
+    expect(s?.version).toBe(4);expect(s?.selected).toEqual(['C0001','C0002','C0003','C0004']);expect(s?.compared).toEqual(['C0001','C0002','C0003']);expect(s?.brief).toEqual(brief);
   });
   it('메모는 원본 지표·미확인 상태·조건 변경과 다음 검토를 보존한다',()=>{
     const candidate=all.find(c=>c.campaigns===0)!;
