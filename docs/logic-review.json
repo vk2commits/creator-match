@@ -1,0 +1,332 @@
+{
+  "dataset": "dummy_creators.csv; 200 rows; unchanged",
+  "scenarioCount": 150,
+  "minimumEligible": 3,
+  "conditions": 47,
+  "uniqueEligibleSets": 27,
+  "evidence": [
+    {
+      "id": "response",
+      "label": "콘텐츠 반응",
+      "conditions": 47,
+      "comparisons": 376,
+      "top1Changed": 20,
+      "meanTop3Overlap": 0.9689716312056735,
+      "singleMetricTop1Changed": 29,
+      "removeMetricTop1Changed": {
+        "engagement": 37,
+        "views": 30,
+        "rating": 8,
+        "experience": 13
+      }
+    },
+    {
+      "id": "reach",
+      "label": "조회 규모",
+      "conditions": 47,
+      "comparisons": 376,
+      "top1Changed": 23,
+      "meanTop3Overlap": 0.9804964539007093,
+      "singleMetricTop1Changed": 22,
+      "removeMetricTop1Changed": {
+        "engagement": 23,
+        "views": 37,
+        "rating": 7,
+        "experience": 9
+      }
+    },
+    {
+      "id": "history",
+      "label": "협업 이력",
+      "conditions": 47,
+      "comparisons": 376,
+      "top1Changed": 17,
+      "meanTop3Overlap": 0.9663120567375886,
+      "singleMetricTop1Changed": 33,
+      "removeMetricTop1Changed": {
+        "engagement": 17,
+        "views": 18,
+        "rating": 20,
+        "experience": 13
+      }
+    },
+    {
+      "id": "balanced",
+      "label": "균등 비교",
+      "conditions": 47,
+      "comparisons": 376,
+      "top1Changed": 26,
+      "meanTop3Overlap": 0.9636524822695036,
+      "singleMetricTop1Changed": 0,
+      "removeMetricTop1Changed": {
+        "engagement": 24,
+        "views": 26,
+        "rating": 14,
+        "experience": 17
+      }
+    }
+  ],
+  "explanationAudit": {
+    "conditions": 47,
+    "mismatches": 29,
+    "examples": [
+      {
+        "input": {
+          "budgetKRW": 1000000,
+          "categories": [
+            "뷰티"
+          ],
+          "sizeTier": "micro"
+        },
+        "first": {
+          "id": "C0180",
+          "name": "민준브이로그180",
+          "category": "뷰티",
+          "platform": "인스타그램",
+          "followers": 37463,
+          "views": 8279,
+          "engagement": 7.6,
+          "campaigns": 28,
+          "totalBudget": 21921372,
+          "averageBudget": 700000,
+          "rating": 4.7
+        },
+        "second": {
+          "id": "C0177",
+          "name": "소라TV177",
+          "category": "뷰티",
+          "platform": "인스타그램",
+          "followers": 12038,
+          "views": 2688,
+          "engagement": 8.1,
+          "campaigns": 10,
+          "totalBudget": 5403589,
+          "averageBudget": 540000,
+          "rating": 4.3
+        },
+        "largestContribution": {
+          "key": "experience",
+          "label": "집행 경험",
+          "normalized": 98.0579026499701,
+          "weight": 0.25,
+          "points": 24.514475662492526,
+          "explanation": "28건 · 건수 증가에 따른 가산 폭을 줄여 반영"
+        },
+        "largestRelativeAdvantage": {
+          "key": "views",
+          "label": "평균 조회수",
+          "delta": 11.228813559322035
+        },
+        "deltas": [
+          {
+            "key": "views",
+            "label": "평균 조회수",
+            "delta": 11.228813559322035
+          },
+          {
+            "key": "experience",
+            "label": "집행 경험",
+            "delta": 7.057397854613182
+          },
+          {
+            "key": "rating",
+            "label": "광고주 평점",
+            "delta": 2.5
+          },
+          {
+            "key": "engagement",
+            "label": "참여율",
+            "delta": -5.084745762711863
+          }
+        ]
+      },
+      {
+        "input": {
+          "budgetKRW": 2000000,
+          "categories": [
+            "뷰티"
+          ],
+          "sizeTier": "micro"
+        },
+        "first": {
+          "id": "C0180",
+          "name": "민준브이로그180",
+          "category": "뷰티",
+          "platform": "인스타그램",
+          "followers": 37463,
+          "views": 8279,
+          "engagement": 7.6,
+          "campaigns": 28,
+          "totalBudget": 21921372,
+          "averageBudget": 700000,
+          "rating": 4.7
+        },
+        "second": {
+          "id": "C0155",
+          "name": "시우매거진155",
+          "category": "뷰티",
+          "platform": "유튜브",
+          "followers": 53669,
+          "views": 14453,
+          "engagement": 6.1,
+          "campaigns": 29,
+          "totalBudget": 42990495,
+          "averageBudget": 1350000,
+          "rating": 4.6
+        },
+        "largestContribution": {
+          "key": "experience",
+          "label": "집행 경험",
+          "normalized": 98.0579026499701,
+          "weight": 0.25,
+          "points": 24.514475662492526,
+          "explanation": "28건 · 건수 증가에 따른 가산 폭을 줄여 반영"
+        },
+        "largestRelativeAdvantage": {
+          "key": "engagement",
+          "label": "참여율",
+          "delta": 12.0731555333998
+        },
+        "deltas": [
+          {
+            "key": "engagement",
+            "label": "참여율",
+            "delta": 12.0731555333998
+          },
+          {
+            "key": "rating",
+            "label": "광고주 평점",
+            "delta": 0.6250000000000036
+          },
+          {
+            "key": "experience",
+            "label": "집행 경험",
+            "delta": -0.24680895455435703
+          },
+          {
+            "key": "views",
+            "label": "평균 조회수",
+            "delta": -8.723828514456631
+          }
+        ]
+      }
+    ]
+  },
+  "reachExpectation": {
+    "conditions": 47,
+    "mismatches": 22,
+    "examples": [
+      {
+        "input": {
+          "budgetKRW": 1000000,
+          "categories": [
+            "뷰티"
+          ],
+          "sizeTier": "micro"
+        },
+        "recommended": {
+          "id": "C0180",
+          "name": "민준브이로그180",
+          "category": "뷰티",
+          "platform": "인스타그램",
+          "followers": 37463,
+          "views": 8279,
+          "engagement": 7.6,
+          "campaigns": 28,
+          "totalBudget": 21921372,
+          "averageBudget": 700000,
+          "rating": 4.7
+        },
+        "maxViews": {
+          "id": "C0151",
+          "name": "지수뷰티151",
+          "category": "뷰티",
+          "platform": "유튜브",
+          "followers": 84604,
+          "views": 10012,
+          "engagement": 5.6,
+          "campaigns": 16,
+          "totalBudget": 11977502,
+          "averageBudget": 710000,
+          "rating": 4.4
+        },
+        "recommendedScore": 61.64689195991227,
+        "maxViewsScore": 56.882859350623036
+      },
+      {
+        "input": {
+          "budgetKRW": 1000000,
+          "categories": [
+            "식품"
+          ],
+          "sizeTier": "micro"
+        },
+        "recommended": {
+          "id": "C0016",
+          "name": "다은TV16",
+          "category": "식품",
+          "platform": "유튜브",
+          "followers": 61438,
+          "views": 11705,
+          "engagement": 7.7,
+          "campaigns": 21,
+          "totalBudget": 12944620,
+          "averageBudget": 710000,
+          "rating": 4.9
+        },
+        "maxViews": {
+          "id": "C0107",
+          "name": "수아채널107",
+          "category": "식품",
+          "platform": "인스타그램",
+          "followers": 65667,
+          "views": 19637,
+          "engagement": 7.4,
+          "campaigns": 28,
+          "totalBudget": 21812197,
+          "averageBudget": 820000,
+          "rating": 4.6
+        },
+        "recommendedScore": 75.6116161066198,
+        "maxViewsScore": 75.08545128194616
+      }
+    ]
+  },
+  "componentSpread": [
+    {
+      "key": "engagement",
+      "min": 0,
+      "max": 100,
+      "sd": 29.55753934384034
+    },
+    {
+      "key": "views",
+      "min": 0,
+      "max": 100,
+      "sd": 29.499027058661863
+    },
+    {
+      "key": "rating",
+      "min": 60,
+      "max": 100,
+      "sd": 10.214626833934947
+    },
+    {
+      "key": "experience",
+      "min": 20.184908658209984,
+      "max": 100,
+      "sd": 21.814793420698997
+    }
+  ],
+  "edgeCases": {
+    "syntheticOnly": true,
+    "scoreCohort": {
+      "label": "유튜브 전체 규모",
+      "size": 20,
+      "fallback": true
+    },
+    "currentUiExactPeerMedian": 150,
+    "actualScoreCohortMedian": 8500,
+    "originalUnknownWithEqualBudgetFields": 27
+  }
+}
