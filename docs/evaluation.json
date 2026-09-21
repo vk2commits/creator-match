@@ -1,0 +1,435 @@
+{
+  "audit": {
+    "hash": "6f139b1a8cac4a7aa0d8034bde2df16ae7c06896ee820eec16ddafbcf2738b8c",
+    "rows": 200,
+    "categories": [
+      {
+        "category": "뷰티",
+        "count": 17
+      },
+      {
+        "category": "식품",
+        "count": 27
+      },
+      {
+        "category": "패션",
+        "count": 21
+      },
+      {
+        "category": "피트니스",
+        "count": 15
+      },
+      {
+        "category": "여행",
+        "count": 21
+      },
+      {
+        "category": "아웃도어",
+        "count": 15
+      },
+      {
+        "category": "라이프스타일",
+        "count": 27
+      },
+      {
+        "category": "테크",
+        "count": 20
+      },
+      {
+        "category": "게임",
+        "count": 18
+      },
+      {
+        "category": "교육",
+        "count": 19
+      }
+    ],
+    "needsQuote": 27,
+    "nullRatings": 27,
+    "mismatches": 173,
+    "followersViewsCorrelation": 0.8986157267552151,
+    "followersEngagementCorrelation": -0.7443110527406349,
+    "groups": [
+      {
+        "tier": "나노",
+        "platform": "유튜브",
+        "n": 23,
+        "engagement": 7.243478260869565,
+        "views": 1189
+      },
+      {
+        "tier": "나노",
+        "platform": "인스타그램",
+        "n": 21,
+        "engagement": 7.404761904761905,
+        "views": 2023
+      },
+      {
+        "tier": "마이크로",
+        "platform": "유튜브",
+        "n": 69,
+        "engagement": 7.288405797101451,
+        "views": 5566
+      },
+      {
+        "tier": "마이크로",
+        "platform": "인스타그램",
+        "n": 60,
+        "engagement": 7.390000000000001,
+        "views": 8662.5
+      },
+      {
+        "tier": "매크로",
+        "platform": "유튜브",
+        "n": 14,
+        "engagement": 5.314285714285714,
+        "views": 46304.5
+      },
+      {
+        "tier": "매크로",
+        "platform": "인스타그램",
+        "n": 13,
+        "engagement": 4.7153846153846155,
+        "views": 104400
+      }
+    ]
+  },
+  "evaluation": {
+    "scenarios": 150,
+    "nonempty": 76,
+    "violations": 0,
+    "changedA": 49,
+    "changedB": 15,
+    "meanTop3Overlap": 0.9429824561403509,
+    "sensitivityComparisons": 608,
+    "sensitivityTop1Changes": 25,
+    "sensitivityMeanTop3Overlap": 0.9687499999999992,
+    "exampleChanges": [
+      {
+        "category": "피트니스",
+        "tier": "micro",
+        "budget": 2000000,
+        "a": "C0044",
+        "b": "C0074",
+        "c": "C0138"
+      },
+      {
+        "category": "피트니스",
+        "tier": "micro",
+        "budget": 10000000,
+        "a": "C0044",
+        "b": "C0074",
+        "c": "C0138"
+      },
+      {
+        "category": "아웃도어",
+        "tier": "macro",
+        "budget": 10000000,
+        "a": "C0123",
+        "b": "C0048",
+        "c": "C0122"
+      },
+      {
+        "category": "라이프스타일",
+        "tier": "nano",
+        "budget": 1000000,
+        "a": "C0169",
+        "b": "C0127",
+        "c": "C0099"
+      },
+      {
+        "category": "라이프스타일",
+        "tier": "nano",
+        "budget": 2000000,
+        "a": "C0169",
+        "b": "C0127",
+        "c": "C0099"
+      },
+      {
+        "category": "라이프스타일",
+        "tier": "nano",
+        "budget": 10000000,
+        "a": "C0169",
+        "b": "C0127",
+        "c": "C0099"
+      }
+    ],
+    "demo": [
+      {
+        "creator": {
+          "id": "C0066",
+          "name": "서연리뷰66",
+          "category": "패션",
+          "platform": "유튜브",
+          "followers": 53254,
+          "views": 10003,
+          "engagement": 8.1,
+          "campaigns": 8,
+          "totalBudget": 11859632,
+          "averageBudget": 1460000,
+          "rating": 4.3
+        },
+        "score": 71.28081760192539,
+        "components": [
+          {
+            "key": "engagement",
+            "label": "참여율",
+            "normalized": 75,
+            "weight": 0.35,
+            "points": 26.25,
+            "explanation": "유튜브 · 마이크로 69명 내 상대 위치 75.0/100"
+          },
+          {
+            "key": "views",
+            "label": "평균 조회수",
+            "normalized": 63.23529411764706,
+            "weight": 0.35,
+            "points": 22.132352941176467,
+            "explanation": "유튜브 · 마이크로 69명 내 상대 위치 63.2/100"
+          },
+          {
+            "key": "rating",
+            "label": "광고주 평점",
+            "normalized": 82.5,
+            "weight": 0.2,
+            "points": 16.5,
+            "explanation": "관측 평점 4.3/5 · 표본 수 미제공"
+          },
+          {
+            "key": "experience",
+            "label": "집행 경험",
+            "normalized": 63.98464660748924,
+            "weight": 0.1,
+            "points": 6.398464660748925,
+            "explanation": "8건 · 건수 증가에 따른 가산 폭을 줄여 반영"
+          }
+        ],
+        "cohort": {
+          "label": "유튜브 · 마이크로",
+          "size": 69,
+          "fallback": false
+        }
+      },
+      {
+        "creator": {
+          "id": "C0077",
+          "name": "정은매거진77",
+          "category": "패션",
+          "platform": "인스타그램",
+          "followers": 97242,
+          "views": 35172,
+          "engagement": 6.5,
+          "campaigns": 24,
+          "totalBudget": 16418189,
+          "averageBudget": 780000,
+          "rating": 5
+        },
+        "score": 68.22951350463642,
+        "components": [
+          {
+            "key": "engagement",
+            "label": "참여율",
+            "normalized": 16.10169491525424,
+            "weight": 0.35,
+            "points": 5.635593220338984,
+            "explanation": "인스타그램 · 마이크로 60명 내 상대 위치 16.1/100"
+          },
+          {
+            "key": "views",
+            "label": "평균 조회수",
+            "normalized": 94.91525423728814,
+            "weight": 0.35,
+            "points": 33.220338983050844,
+            "explanation": "인스타그램 · 마이크로 60명 내 상대 위치 94.9/100"
+          },
+          {
+            "key": "rating",
+            "label": "광고주 평점",
+            "normalized": 100,
+            "weight": 0.2,
+            "points": 20,
+            "explanation": "관측 평점 5.0/5 · 표본 수 미제공"
+          },
+          {
+            "key": "experience",
+            "label": "집행 경험",
+            "normalized": 93.73581301246587,
+            "weight": 0.1,
+            "points": 9.373581301246587,
+            "explanation": "24건 · 건수 증가에 따른 가산 폭을 줄여 반영"
+          }
+        ],
+        "cohort": {
+          "label": "인스타그램 · 마이크로",
+          "size": 60,
+          "fallback": false
+        }
+      },
+      {
+        "creator": {
+          "id": "C0167",
+          "name": "하윤다이어리167",
+          "category": "패션",
+          "platform": "유튜브",
+          "followers": 52914,
+          "views": 9471,
+          "engagement": 7.3,
+          "campaigns": 25,
+          "totalBudget": 52310829,
+          "averageBudget": 1910000,
+          "rating": 4.5
+        },
+        "score": 66.36279463641003,
+        "components": [
+          {
+            "key": "engagement",
+            "label": "참여율",
+            "normalized": 50.73529411764706,
+            "weight": 0.35,
+            "points": 17.757352941176467,
+            "explanation": "유튜브 · 마이크로 69명 내 상대 위치 50.7/100"
+          },
+          {
+            "key": "views",
+            "label": "평균 조회수",
+            "normalized": 61.76470588235294,
+            "weight": 0.35,
+            "points": 21.61764705882353,
+            "explanation": "유튜브 · 마이크로 69명 내 상대 위치 61.8/100"
+          },
+          {
+            "key": "rating",
+            "label": "광고주 평점",
+            "normalized": 87.5,
+            "weight": 0.2,
+            "points": 17.5,
+            "explanation": "관측 평점 4.5/5 · 표본 수 미제공"
+          },
+          {
+            "key": "experience",
+            "label": "집행 경험",
+            "normalized": 94.87794636410023,
+            "weight": 0.1,
+            "points": 9.487794636410023,
+            "explanation": "25건 · 건수 증가에 따른 가산 폭을 줄여 반영"
+          }
+        ],
+        "cohort": {
+          "label": "유튜브 · 마이크로",
+          "size": 69,
+          "fallback": false
+        }
+      },
+      {
+        "creator": {
+          "id": "C0180",
+          "name": "민준브이로그180",
+          "category": "뷰티",
+          "platform": "인스타그램",
+          "followers": 37463,
+          "views": 8279,
+          "engagement": 7.6,
+          "campaigns": 28,
+          "totalBudget": 21921372,
+          "averageBudget": 700000,
+          "rating": 4.7
+        },
+        "score": 65.67867162092921,
+        "components": [
+          {
+            "key": "engagement",
+            "label": "참여율",
+            "normalized": 59.32203389830509,
+            "weight": 0.35,
+            "points": 20.76271186440678,
+            "explanation": "인스타그램 · 마이크로 60명 내 상대 위치 59.3/100"
+          },
+          {
+            "key": "views",
+            "label": "평균 조회수",
+            "normalized": 47.45762711864407,
+            "weight": 0.35,
+            "points": 16.610169491525422,
+            "explanation": "인스타그램 · 마이크로 60명 내 상대 위치 47.5/100"
+          },
+          {
+            "key": "rating",
+            "label": "광고주 평점",
+            "normalized": 92.5,
+            "weight": 0.2,
+            "points": 18.5,
+            "explanation": "관측 평점 4.7/5 · 표본 수 미제공"
+          },
+          {
+            "key": "experience",
+            "label": "집행 경험",
+            "normalized": 98.0579026499701,
+            "weight": 0.1,
+            "points": 9.805790264997011,
+            "explanation": "28건 · 건수 증가에 따른 가산 폭을 줄여 반영"
+          }
+        ],
+        "cohort": {
+          "label": "인스타그램 · 마이크로",
+          "size": 60,
+          "fallback": false
+        }
+      },
+      {
+        "creator": {
+          "id": "C0013",
+          "name": "지우라이프13",
+          "category": "패션",
+          "platform": "유튜브",
+          "followers": 87063,
+          "views": 11026,
+          "engagement": 7.1,
+          "campaigns": 30,
+          "totalBudget": 52644740,
+          "averageBudget": 1630000,
+          "rating": 4.2
+        },
+        "score": 65.11764705882354,
+        "components": [
+          {
+            "key": "engagement",
+            "label": "참여율",
+            "normalized": 42.64705882352941,
+            "weight": 0.35,
+            "points": 14.926470588235293,
+            "explanation": "유튜브 · 마이크로 69명 내 상대 위치 42.6/100"
+          },
+          {
+            "key": "views",
+            "label": "평균 조회수",
+            "normalized": 69.11764705882354,
+            "weight": 0.35,
+            "points": 24.191176470588236,
+            "explanation": "유튜브 · 마이크로 69명 내 상대 위치 69.1/100"
+          },
+          {
+            "key": "rating",
+            "label": "광고주 평점",
+            "normalized": 80,
+            "weight": 0.2,
+            "points": 16,
+            "explanation": "관측 평점 4.2/5 · 표본 수 미제공"
+          },
+          {
+            "key": "experience",
+            "label": "집행 경험",
+            "normalized": 100,
+            "weight": 0.1,
+            "points": 10,
+            "explanation": "30건 · 건수 증가에 따른 가산 폭을 줄여 반영"
+          }
+        ],
+        "cohort": {
+          "label": "유튜브 · 마이크로",
+          "size": 69,
+          "fallback": false
+        }
+      }
+    ]
+  }
+}
