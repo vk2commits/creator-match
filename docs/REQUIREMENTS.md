@@ -49,7 +49,7 @@
 | U04 | 후보별 정보와 공통 확인의 분리 | candidateCautions, 팀 검토안 | P05·P06, 결측·조건 밖 테스트 |
 | U05 | 사용자와 검증의 출처 | docs/PERSONA_TEST.md | 사용자 선택과 AI 점검 기록, 실제 인터뷰 미수행 명시 |
 | U06 | 브리프와 3단계 온보딩 | App Onboarding, PRD 온보딩 | 브라우저 브리프→조건→비중, 재진입 |
-| U07 | 문의 뒤 협업 상태 | Workflow.tsx, campaign.ts | 복사 후 미발송 유지·연락일·합의 정보 검증 |
+| U07 | 문의 뒤 협업 상태 | Workflow.tsx, campaign.ts | 한 명 대상·발송 시연/실제 날짜 분리·누락 허용/값 검증·상태 전환 |
 | U08 | 실제 성과 기록·상세 | campaign.ts, Workflow.tsx | 결측·0·부분 집계·브라우저 저장·예시 분리 |
 | U09 | 작동하는 AI 시연 | BriefBuilder.tsx, briefDemo.ts, AssistantPanel.tsx, assistantDemo.ts | 조건·문안·성과 결과 적용; 실제 모델과 구분. 개발용 응답 파서 별도 |
 | U10 | 처리 중 표시·색상·카피 | useRecommendation.ts, design.css | 실제 Worker 처리와 분리, 데스크톱 시각 확인 |
@@ -57,3 +57,12 @@
 5차 추가 범위는 원문 필수 기능과 구분한다. 수동 연락·성과 기록은 선택 기능이고 실제 발송·자동 수집·계약·과금은 구현하지 않는다. 공개 GitHub·최종 제출·사용자 승인은 여전히 미완료다.
 
 6차 정보 구조·카피·설명 일치·전환·체험 경계는 [UX 재검토](EXPERIENCE_REVIEW.md)와 [QA](QA.md)에 연결한다. 모바일 추가 작업은 하지 않았다.
+
+7차 최신 수용 기준은 [고객·협업 UX](COLLABORATION_UX.md)와 [QA](QA.md)에 연결한다. 이전 사용성 정책 중 필수 선정 메모·숨긴 진행 상태·문의일/제작 조건 누락 차단을 대체한다.
+
+| ID | 행동 | 구현·정책 | 검증 |
+|---|---|---|---|
+| U11 | 타깃 고객별 콘텐츠 적합 분석 | CustomerFields, channelAnalysis, FitAnalysis; 합성 예시 명시 | 고객/채널 변경, 실제 추천 불변 |
+| U12 | 한 명씩 문의와 이어가기 | App openInquiry, CollaborationEditor | 문의 후보3명 중 누른1명만 열림 |
+| U13 | 발송 시연·상태별 입력·유연한 변경 | collaborationFlow, campaign, Workflow | 발송→답변→견적→제작→성과, 되돌림·복원 |
+| U14 | 반복 태그·행동 카피 정리 | App, CollaborationEditor, design.css | 데스크톱 화면·자동 카피 검색 |
