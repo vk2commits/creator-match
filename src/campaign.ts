@@ -8,18 +8,19 @@ export const GOALS = [
   {id:'sales',label:'구매로 연결하기',detail:'제품을 보고 실제 구매까지 이어지길 바라요',priority:'balanced'},
 ] as const;
 export type Goal = typeof GOALS[number]['id'];
-export type Campaign = { name: string; product: string; goal: Goal };
+export type CustomerNeed = 'proof' | 'routine' | 'discovery';
+export type Campaign = { name: string; product: string; goal: Goal; targetCustomer?: string; customerNeed?: CustomerNeed };
 export const EMPTY_CAMPAIGN:Campaign={name:'',product:'',goal:'awareness'};
 export const campaignOf=(brief:Brief):Campaign=>brief.campaign??{name:'나의 캠페인',product:'',goal:'awareness'};
-export const STAGES=[{id:'draft',label:'문의 준비',next:'문의 문안 준비'},{id:'contacted',label:'답변 대기',next:'답변·견적 기록'},{id:'negotiating',label:'조건 협의',next:'협업 조건 확정'},{id:'active',label:'제작 진행',next:'콘텐츠·성과 기록'},{id:'complete',label:'집행 완료',next:'성과 업데이트'},{id:'declined',label:'진행 안 함',next:'협업 기록 보기'}] as const;
+export const STAGES=[{id:'draft',label:'문의 준비',next:'문의 문안 작성'},{id:'contacted',label:'답변 대기',next:'답변·견적 기록'},{id:'negotiating',label:'조건 협의',next:'견적·조건 검토'},{id:'active',label:'제작 진행',next:'제작 진행 관리'},{id:'complete',label:'집행 완료',next:'성과 업데이트'},{id:'declined',label:'진행 안 함',next:'사유·재검토'}] as const;
 export type Stage=typeof STAGES[number]['id'];
 export const METRICS=[{key:'views',label:'조회수',unit:'회'},{key:'likes',label:'좋아요',unit:'개'},{key:'comments',label:'댓글',unit:'개'},{key:'shares',label:'공유',unit:'회'},{key:'saves',label:'저장',unit:'회'},{key:'clicks',label:'링크 클릭',unit:'회'},{key:'conversions',label:'구매',unit:'건'},{key:'revenue',label:'연결 매출',unit:'원'}] as const;
 export type Metric=typeof METRICS[number]['key'];
 export type Outcome={cost:number|null;measuredAt:string;source:string;contentUrl:string;attribution:string}&Record<Metric,number|null>;
-export type WorkRecord={stage:Stage;email:string;channelUrl:string;deliverable:string;dueDate:string;rights:string;agreedCost:number|null;contactedAt:string;memo:string;message:string;outcome:Outcome};
+export type WorkRecord={stage:Stage;email:string;channelUrl:string;deliverable:string;dueDate:string;rights:string;agreedCost:number|null;quotedCost:number|null;contactedAt:string;demoSentAt:string;sentMessage:string;closedReason:string;memo:string;message:string;outcome:Outcome};
 export type WorkRecords=Record<string,WorkRecord>;
 export const emptyOutcome=():Outcome=>({cost:null,measuredAt:'',source:'',contentUrl:'',attribution:'',views:null,likes:null,comments:null,shares:null,saves:null,clicks:null,conversions:null,revenue:null});
-export const emptyWork=():WorkRecord=>({stage:'draft',email:'',channelUrl:'',deliverable:'',dueDate:'',rights:'',agreedCost:null,contactedAt:'',memo:'',message:'',outcome:emptyOutcome()});
+export const emptyWork=():WorkRecord=>({stage:'draft',email:'',channelUrl:'',deliverable:'',dueDate:'',rights:'',agreedCost:null,quotedCost:null,contactedAt:'',demoSentAt:'',sentMessage:'',closedReason:'',memo:'',message:'',outcome:emptyOutcome()});
 export function safeUrl(value:string):boolean {try{const u=new URL(value);return ['https:','http:'].includes(u.protocol)&&!u.username&&!u.password;}catch{return false;}}
 export const validNumber=(value:unknown):value is number=>typeof value==='number'&&Number.isSafeInteger(value)&&value>=0;
 export function parseMetric(value:string):number|null {if(!value.trim())return null;const n=Number(value.replaceAll(',',''));return validNumber(n)&&/^[\d,]+$/.test(value)?n:NaN;}
@@ -39,9 +40,9 @@ export function workErrors(w:WorkRecord):string[]{return [
   ...(w.channelUrl&&!safeUrl(w.channelUrl)?['채널 링크는 http 또는 https 주소로 입력해 주세요.']:[]),
   ...(w.dueDate&&!validDate(w.dueDate)?['게시 예정일을 확인해 주세요.']:[]),
   ...(w.contactedAt&&!validDate(w.contactedAt)?['문의한 날짜를 확인해 주세요.']:[]),
-  ...(w.stage!=='draft'&&w.stage!=='declined'&&!validDate(w.contactedAt)?['실제로 문의한 날짜를 기록해 주세요.']:[]),
   ...(w.agreedCost!==null&&!validNumber(w.agreedCost)?['합의 비용은 0 이상의 정수로 입력해 주세요.']:[]),
-  ...(['active','complete'].includes(w.stage)&&(w.agreedCost===null||!w.deliverable.trim())?['협업을 진행하려면 합의 비용과 제작 범위를 기록해 주세요.']:[]),
+  ...(w.quotedCost!==null&&!validNumber(w.quotedCost)?['받은 견적은 0 이상의 정수로 입력해 주세요.']:[]),
+  ...(w.demoSentAt&&!Number.isFinite(Date.parse(w.demoSentAt))?['시연 발송 기록을 확인해 주세요.']:[]),
   ...outcomeErrors(w.outcome),
 ];}
 export const hasOutcome=(o:Outcome)=>[o.cost,...METRICS.map(m=>o[m.key])].some(n=>n!==null);
@@ -71,10 +72,10 @@ export function readWork(raw:unknown):WorkRecords {
     if(!/^C\d{4}$/.test(id)||!value||typeof value!=='object')continue;
     const w={...emptyWork(),...value,outcome:{...emptyOutcome(),...value.outcome}} as WorkRecord;
     if(!STAGES.some(s=>s.id===w.stage))continue;
-    const strings=['email','channelUrl','deliverable','dueDate','rights','contactedAt','memo','message'] as const;
+    const strings=['email','channelUrl','deliverable','dueDate','rights','contactedAt','demoSentAt','sentMessage','closedReason','memo','message'] as const;
     if(strings.some(k=>typeof w[k]!=='string')||['measuredAt','source','contentUrl','attribution'].some(k=>typeof w.outcome[k as keyof Outcome]!=='string'))continue;
     if(workErrors(w).length)continue;
-    for(const k of strings)w[k]=w[k].slice(0,k==='message'?12000:2000);
+    for(const k of strings)w[k]=w[k].slice(0,['message','sentMessage'].includes(k)?12000:2000);
     result[id]=w;
   }
   return result;

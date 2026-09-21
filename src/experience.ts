@@ -30,6 +30,10 @@ export function readSession(raw: string | null): SavedSession | null {
     const decisions=Object.fromEntries(Object.entries(data.decisions??{}).filter(([id,d])=>selected.includes(id)&&['review','contact','hold'].includes(d as string))) as Decisions;
     const campaign=data.brief.campaign;
     if(campaign&&(typeof campaign.name!=='string'||typeof campaign.product!=='string'||!['awareness','engagement','sales'].includes(campaign.goal)))delete data.brief.campaign;
+    if(data.brief.campaign){
+      data.brief.campaign.targetCustomer=typeof campaign.targetCustomer==='string'?campaign.targetCustomer.slice(0,300):'';
+      if(!['proof','routine','discovery'].includes(campaign.customerNeed))delete data.brief.campaign.customerNeed;
+    }
     return { version: 5, work: readWork(data.work), brief: data.brief, selected, compared, notes, decisions };
   } catch { return null; }
 }
