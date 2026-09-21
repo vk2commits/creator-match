@@ -37,7 +37,7 @@ writeFileSync('docs/DATA_AUDIT.md', '# 데이터 감사\n\n원본 CSV를 읽어 
   + groups.map(g=>'| '+g.tier+' | '+g.platform+' | '+g.n+' | '+g.engagement.toFixed(2)+'% | '+g.views.toLocaleString('ko-KR')+' |').join('\n')
   + '\n\n팔로워-조회수 피어슨 상관: '+audit.followersViewsCorrelation.toFixed(4)+'. 팔로워-참여율: '+audit.followersEngagementCorrelation.toFixed(4)+'. 인과 관계나 실제 시장 특성으로 일반화하지 않는다. 팔로워와 조회수를 모두 가산하면 규모를 중복 반영할 가능성이 있어 팔로워는 필터로만 사용한다.\n\n'
   + '## 필드 해석\n\n| 원본 필드 | 사용 | 해석 한계 |\n|---|---|---|\n'
-  + '| creator_id / creator_name | 식별·동점·표시 | 실존 채널로 연결하지 않음 |\n| category / platform | 조건·참조 집단 | 세부 콘텐츠와 오디언스 정보 없음 |\n| followers | 규모 필터·표시 | 참여·구매를 증명하지 않음 |\n| avg_view_count | 상대 점수·표시 | 집계 기간·광고 전용 조회수 아님 |\n| engagement_rate | 상대 점수·표시 | 정의·분모·기간 미제공 |\n| total_campaign_count | 체감 가산·표시 | 성공 건수나 평점 표본 수 아님 |\n| total_campaign_budget_krw | 감사에만 사용 | 평균 필드와 불일치 원인 미상 |\n| avg_campaign_budget_krw | 참고 예산 필터·표시 | 현재 단가·세금·권리 범위 미확인 |\n| advertiser_rating | 1~5 관측 점수·표시 | 공란은 미평가, 표본 수 미상 |\n\n'
+  + '| creator_id / creator_name | 식별·동점·표시 | 실존 채널로 연결하지 않음 |\n| category / platform | 조건·참조 집단 | 세부 콘텐츠와 오디언스 정보 없음 |\n| followers | 규모 필터·표시 | 참여·구매를 증명하지 않음 |\n| avg_view_count | 상대 점수·표시 | 집계 기간·광고 전용 조회수 아님 |\n| engagement_rate | 상대 점수·표시 | 정의·분모·기간 미제공 |\n| total_campaign_count | 체감 가산·표시 | 성공 건수나 평점 표본 수 아님 |\n| total_campaign_budget_krw | 감사·상세·비교 메모, 점수 제외 | 평균 필드와 불일치 원인 미상 |\n| avg_campaign_budget_krw | 참고 예산 필터·표시 | 현재 단가·세금·권리 범위 미확인 |\n| advertiser_rating | 1~5 관측 점수·표시 | 공란은 미평가, 표본 수 미상 |\n\n'
   + '## 정규화·오류 처리\n\n원본을 수정하지 않고 메모리에서 숫자·null로 변환한다. 잘못된 CSV·중복 ID·필수 결측·범위 밖 숫자는 명시적 오류로 중단한다. 잘못된 행을 조용히 삭제하지 않는다. 모든 행에 발생하는 예산 산술 불일치는 알려진 한계로 보존한다.\n');
 
 const budgets = [1, 300_000, 1_000_000, 2_000_000, 10_000_000];
@@ -89,14 +89,23 @@ writeFileSync('docs/EVALUATION.md','# 추천 방식 비교와 민감도\n\n`npm 
   +'| 가중치 변형의 상위 3명 평균 겹침 | '+(mean(sensitivityOverlaps)*100).toFixed(1)+'% | 안정성의 관찰, 최적성 아님 |\n\n'
   +'## 집단 보정으로 1위가 달라진 사례\n\n| 카테고리 | 규모 | 예산 | A | B | C |\n|---|---|---:|---|---|---|\n'
   +exampleChanges.map(x=>'| '+x.category+' | '+x.tier+' | '+x.budget+' | '+x.a+' | '+x.b+' | '+x.c+' |').join('\n')
-  +'\n\n## 기본 화면 실제 후보\n\n뷰티·패션, 마이크로, 2,000,000원. 점수는 소수점 둘째 자리에서 반올림하며 정렬은 반올림 전 값이다.\n\n| ID | 이름 | 플랫폼 | 점수 | 참여 기여 | 조회 기여 | 평점 기여 | 경험 기여 |\n|---|---|---|---:|---:|---:|---:|---:|\n'
+  +'\n\n## 균등 기준 예시의 실제 후보\n\n뷰티·패션, 마이크로, 2,000,000원. 이 분석 표의 총점은 소수 첫째 자리, 구성요소는 둘째 자리까지 표시한다. UI 상세는 총점·구성요소 모두 둘째 자리이며 정렬은 반올림 전 값이다. 첫 설정은 무선택으로 시작하고 예시 우회만 균등 기준을 사용한다.\n\n| ID | 이름 | 플랫폼 | 점수 | 참여 기여 | 조회 기여 | 평점 기여 | 경험 기여 |\n|---|---|---|---:|---:|---:|---:|---:|\n'
   +demo.map(x=>'| '+[x.creator.id,x.creator.name,x.creator.platform,x.score.toFixed(1),...x.components.map(c=>c.points.toFixed(2))].join(' | ')+' |').join('\n')
   +'\n\n## 선택과 한계\n\nC를 채택한다. 플랫폼별 지표 정의가 같다고 가정하지 않고, 모든 후보에 비교 집단과 표본 수를 설명할 수 있다는 제품상의 이점이 있다. 실험에서 C가 실제 캠페인 성과를 개선한다고 입증한 것은 아니다. 상대 순위가 절대 차이를 줄이고, 카테고리·기간 차이를 해소하지 못하며, 작은 집단의 단일 관측치 변화에 민감할 수 있다. 원지표와 개별 정렬을 유지한다. 더 많은 실제 성과 데이터가 생기기 전에는 수식을 복잡하게 확장하지 않는다.\n');
 console.log(JSON.stringify({rows:all.length,hash,scenarios:scenarios.length,nonempty,violations,changedA,changedB,sensitivityTop1Changes,sensitivityComparisons,demo:demo.map(x=>({id:x.creator.id,name:x.creator.name,score:x.score}))},null,2));
 const priorityRows=PRIORITIES.map(p=>{const r=recommend(all,DEFAULT_INPUT,'cohort',p.weights);return {label:p.label,weights:p.weights,top3:r.matched.slice(0,3).map(x=>x.creator.name),count:r.matched.length};});
 let priorityNonempty=0,priorityChanged=0;
+const prioritySimilarities=[1,3].map(minimum=>({minimum,conditions:0,sameFirst:0,sameTop3:0}));
 for(const category of CATEGORIES)for(const tier of TIERS)for(const budgetKRW of [1,300000,1000000,2000000,10000000]){
   const input={budgetKRW,categories:[category],sizeTier:tier.id};const rankings=PRIORITIES.map(p=>recommend(all,input,'cohort',p.weights).matched);
   if(rankings[0].length){priorityNonempty++;if(new Set(rankings.map(r=>r[0].creator.id)).size>1)priorityChanged++;}
+  const history=rankings[PRIORITIES.findIndex(p=>p.id==='history')];
+  const balanced=rankings[PRIORITIES.findIndex(p=>p.id==='balanced')];
+  for(const row of prioritySimilarities)if(history.length>=row.minimum){
+    row.conditions++;
+    if(history[0].creator.id===balanced[0].creator.id)row.sameFirst++;
+    if(history.slice(0,3).map(x=>x.creator.id).join()===balanced.slice(0,3).map(x=>x.creator.id).join())row.sameTop3++;
+  }
 }
-writeFileSync('docs/PRIORITY_EVALUATION.md','# 추천 우선순위 비교\n\n첫 방문에서 사용자가 기준을 선택한다. 예시 우회는 균등 비교를 명시한다. 모든 비중은 목적을 표현한 설계 가정이며 성과 최적화 결과가 아니다. `npm run analyze`로 재생성한다.\n\n| 기준 | 참여율/조회/평점/경험 | 1위 | 2위 | 3위 | 적격 수 |\n|---|---|---|---|---|---:|\n'+priorityRows.map(r=>'| '+r.label+' | '+Object.values(r.weights).map(n=>n*100).join('/')+' | '+r.top3.join(' | ')+' | '+r.count+' |').join('\n')+'\n\n예시: 뷰티·패션, 마이크로, 200만원. 150조건 중 비어 있지 않은 '+priorityNonempty+'조건에서 '+priorityChanged+'조건은 선택 기준에 따라 1위가 달랐다. 기준별 적격 집합은 같고 순서만 바뀐다. 네 기준×150조건의 적격성·계산 합계는 자동 테스트에서 확인했다.\n\n조회 규모는 같은 플랫폼·규모 내 상대 조회 위치이며 절대 조회수 최대화와 다르다. 균등 비교도 중립적인 정답은 아니다. 카테고리 적합도·현재 비용·실제 전환 등 없는 데이터를 가산하지 않는다. 목표별 가중치의 최적성과 사용자 선택 시간 개선은 아직 검증하지 않았다.\n');
+writeFileSync('docs/PRIORITY_EVALUATION.md','# 추천 우선순위 비교\n\n첫 방문에서 사용자가 기준을 선택한다. 예시 우회는 균등 비교를 명시한다. 모든 비중은 목적을 표현한 설계 가정이며 성과 최적화 결과가 아니다. `npm run analyze`로 재생성한다.\n\n| 기준 | 참여율/조회/평점/경험 | 1위 | 2위 | 3위 | 적격 수 |\n|---|---|---|---|---|---:|\n'+priorityRows.map(r=>'| '+r.label+' | '+Object.values(r.weights).map(n=>Math.round(n*100)).join('/')+' | '+r.top3.join(' | ')+' | '+r.count+' |').join('\n')+'\n\n예시: 뷰티·패션, 마이크로, 200만원. 150조건 중 비어 있지 않은 '+priorityNonempty+'조건에서 '+priorityChanged+'조건은 선택 기준에 따라 1위가 달랐다. 기준별 적격 집합은 같고 순서만 바뀐다. 네 기준×150조건의 적격성·계산 합계는 자동 테스트에서 확인했다.\n\n조회 규모는 같은 플랫폼·규모 내 상대 조회 위치이며 절대 조회수 최대화와 다르다. 균등 비교도 중립적인 정답은 아니다. 카테고리 적합도·현재 비용·실제 전환 등 없는 데이터를 가산하지 않는다. 목표별 가중치의 최적성과 사용자 선택 시간 개선은 아직 검증하지 않았다.\n');
+writeFileSync('docs/PRIORITY_EVALUATION.md', '\n## 선택지 중복 검토\n\n| 포함 조건 | 조건 수 | 협업 이력·균등 1위 일치 | 상위 3명 순서까지 일치 |\n|---|---:|---:|---:|\n' + prioritySimilarities.map(r=>'| 적격 '+r.minimum+'명 이상 | '+r.conditions+' | '+r.sameFirst+' | '+r.sameTop3+' |').join('\n') + '\n\n후보 1명인 조건은 어떤 기준에서도 1위가 같으므로, 후보가 최소 3명인 조건도 따로 확인했다. 조건들은 같은 데이터와 일부 후보를 반복해서 포함하며 독립적인 사용자 표본이 아니다. 결과의 유사성은 네 선택지를 같은 비중으로 노출할 필요가 있는지 검토하게 한다. 3개 우선순위와 균등 보조 경로로 단순화하는 안은 아직 사용자 검토 전이며 구현은 4개 선택지를 유지한다.\n', {flag:'a'});

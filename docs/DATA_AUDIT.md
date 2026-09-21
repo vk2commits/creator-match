@@ -31,7 +31,7 @@
 | avg_view_count | 상대 점수·표시 | 집계 기간·광고 전용 조회수 아님 |
 | engagement_rate | 상대 점수·표시 | 정의·분모·기간 미제공 |
 | total_campaign_count | 체감 가산·표시 | 성공 건수나 평점 표본 수 아님 |
-| total_campaign_budget_krw | 감사에만 사용 | 평균 필드와 불일치 원인 미상 |
+| total_campaign_budget_krw | 감사·상세·비교 메모, 점수 제외 | 평균 필드와 불일치 원인 미상 |
 | avg_campaign_budget_krw | 참고 예산 필터·표시 | 현재 단가·세금·권리 범위 미확인 |
 | advertiser_rating | 1~5 관측 점수·표시 | 공란은 미평가, 표본 수 미상 |
 

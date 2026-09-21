@@ -33,7 +33,7 @@ export function comparisonMarkdown(creators: readonly Creator[], brief: Brief, a
   const eligible=(c:Creator)=>brief.input.categories.includes(c.category) && (c.followers<10000?'nano':c.followers<100000?'micro':'macro')===brief.input.sizeTier && hasKnownBudget(c) && c.averageBudget<=brief.input.budgetKRW;
   return '# 캠페인 후보 비교 메모\n\n'+
     '기준: '+p.label+' / '+brief.input.categories.join('·')+' / '+tierLabel(brief.input.sizeTier)+' / 1명당 '+moneyText(brief.input.budgetKRW)+' 이내\n\n'+
-    '가중치: 참여율 '+p.weights.engagement*100+'%, 조회수 '+p.weights.views*100+'%, 평점 '+p.weights.rating*100+'%, 경험 '+p.weights.experience*100+'%. 성과 예측이 아닌 검토 기준입니다.\n\n'+
+    '가중치: 참여율 '+Math.round(p.weights.engagement*100)+'%, 조회수 '+Math.round(p.weights.views*100)+'%, 평점 '+Math.round(p.weights.rating*100)+'%, 경험 '+Math.round(p.weights.experience*100)+'%. 성과 예측이 아닌 검토 기준입니다.\n\n'+
     '| 후보 | 플랫폼·분야 | 팔로워 | 평균 조회수 | 참여율 | 집행 | 평점 | 과거 평균 비용 | 원본 누적 집행액 | 현재 조건 |\n|---|---|---:|---:|---:|---:|---|---:|---:|---|\n'+
     creators.map(c=>'| '+c.name+' ('+c.id+') | '+c.platform+'·'+c.category+' | '+numberText(c.followers)+' | '+numberText(c.views)+' | '+c.engagement+'% | '+c.campaigns+' | '+(c.rating??'미평가')+' | '+(hasKnownBudget(c)?moneyText(c.averageBudget):'비용 미확인')+' | '+moneyText(c.totalBudget)+' | '+(eligible(c)?'충족':hasKnownBudget(c)?'조건 재확인':'비용 미확인')+' |').join('\n')+
     '\n\n## 검토 근거\n\n'+creators.map(c=>'- '+c.name+': '+(hasKnownBudget(c)?insight(scoreCreator(c,all,'cohort',p.weights)):'가격·평점 등 추가 정보 확인 필요')).join('\n')+
