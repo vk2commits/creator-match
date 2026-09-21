@@ -9,7 +9,7 @@ export const TIERS = [
 ] as const;
 export type Tier = typeof TIERS[number]['id'];
 export const WEIGHTS = { engagement: 0.35, views: 0.35, rating: 0.20, experience: 0.10 } as const;
-export type Weights = { [K in keyof typeof WEIGHTS]: number };
+export type Weights = { -readonly [K in keyof typeof WEIGHTS]: number };
 export const MIN_COHORT_SIZE = 10;
 export const SOURCE_SHA256 = '6f139b1a8cac4a7aa0d8034bde2df16ae7c06896ee820eec16ddafbcf2738b8c';
 export const SORT_OPTIONS = [
@@ -25,4 +25,3 @@ export const tierLabel = (tier: Tier) => TIERS.find(t => t.id === tier)!.label;
 export const DEFAULT_INPUT = { budgetKRW: 2_000_000, categories: ['뷰티', '패션'] as Category[], sizeTier: 'micro' as Tier };
 export const numberText = (value: number) => new Intl.NumberFormat('ko-KR').format(value);
 export const moneyText = (value: number) => numberText(value) + '원';
-
