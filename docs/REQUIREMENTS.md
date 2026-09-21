@@ -51,7 +51,9 @@
 | U06 | 브리프와 3단계 온보딩 | App Onboarding, PRD 온보딩 | 브라우저 브리프→조건→비중, 재진입 |
 | U07 | 문의 뒤 협업 상태 | Workflow.tsx, campaign.ts | 복사 후 미발송 유지·연락일·합의 정보 검증 |
 | U08 | 실제 성과 기록·상세 | campaign.ts, Workflow.tsx | 결측·0·부분 집계·브라우저 저장·예시 분리 |
-| U09 | 실제 AI 연결 경로 | server/assistant.ts, AssistantPanel.tsx | 미연결 UI·응답 파서 통과; 실호출 미검증 |
+| U09 | 작동하는 AI 시연 | BriefBuilder.tsx, briefDemo.ts, AssistantPanel.tsx, assistantDemo.ts | 조건·문안·성과 결과 적용; 실제 모델과 구분. 개발용 응답 파서 별도 |
 | U10 | 처리 중 표시·색상·카피 | useRecommendation.ts, design.css | 실제 Worker 처리와 분리, 데스크톱 시각 확인 |
 
 5차 추가 범위는 원문 필수 기능과 구분한다. 수동 연락·성과 기록은 선택 기능이고 실제 발송·자동 수집·계약·과금은 구현하지 않는다. 공개 GitHub·최종 제출·사용자 승인은 여전히 미완료다.
+
+6차 정보 구조·카피·설명 일치·전환·체험 경계는 [UX 재검토](EXPERIENCE_REVIEW.md)와 [QA](QA.md)에 연결한다. 모바일 추가 작업은 하지 않았다.
