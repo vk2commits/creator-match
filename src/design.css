@@ -24,3 +24,20 @@
 .save-check{width:24px;height:24px}.memo-preview{margin:0 26px 26px;border-top:1px solid var(--line);padding-top:20px}.memo-preview>label{font-size:13px;font-weight:600;display:block;margin-bottom:10px}.memo-preview textarea{width:100%;min-height:250px;font:12px/1.8 -apple-system,BlinkMacSystemFont,sans-serif;padding:15px;border:1px solid #d5dfcc;border-radius:6px;resize:vertical;color:#536847;background:#fcfdf9}.memo-preview>div{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px}.memo-preview [role=status]{font-size:11px;color:#64824e}@media(max-width:480px){.memo-preview{margin:0 18px 22px}.memo-preview .primary-button,.memo-preview .secondary-button{font-size:11px;padding:10px 13px}}
 h1,h2,h3,.priority-card>strong{word-break:keep-all;overflow-wrap:break-word}
 .tier-options strong{word-break:keep-all;overflow-wrap:normal}
+
+/* Desktop review: preserve space for candidates and distinguish saving from comparing. */
+.balanced-choice{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:14px 12px;margin-top:10px;border:1px solid transparent;border-radius:6px;font-size:13px;color:#5b705f}
+.balanced-choice small{display:block;font-size:11px;color:#708071;margin-top:3px}
+.balanced-choice[aria-pressed=true]{background:#edf3e9;border-color:#8ca991}
+.save-check:not(.checked){color:#89967e}
+.decision-row textarea{width:100%;min-height:86px;resize:vertical;border:1px solid #bdcdb4;border-radius:6px;padding:10px;font:12px/1.7 -apple-system,BlinkMacSystemFont,sans-serif;color:#344c39;background:#fcfdf9}
+.decision-row small{display:block;font-size:10px;margin-top:5px;color:#6f7c62}
+textarea:focus-visible{outline:3px solid #85ab95;outline-offset:2px}
+@media(min-width:781px){
+  .onboarding-header{height:76px}.onboarding-main{margin-top:28px;gap:56px}.welcome h1{font-size:46px}.welcome-foot{margin-top:44px}
+  .priority-grid{grid-template-columns:1fr;gap:10px}.priority-card{min-height:96px;padding:18px 40px 18px 62px}.priority-symbol{position:absolute;left:21px;top:26px;margin:0}.priority-card>p{margin-top:5px}.choice-mark{top:23px}.priority-guide .priority-card{min-height:92px}
+  .topbar{height:48px}.main-shell{padding-bottom:100px}.page-heading{padding:22px 0 16px}.page-heading h1{font-size:25px}.page-heading .section-kicker{margin-bottom:5px}
+  .brief-bar{min-height:48px;padding:9px 4px;margin-bottom:8px}.priority-strip{padding:8px 0 12px;margin-bottom:13px}
+  .list-context{margin:9px 0 12px}.table-heading{padding-top:10px;padding-bottom:10px;white-space:nowrap}.candidate-row{padding-top:10px;padding-bottom:10px;min-height:85px}
+  .row-insight{font-size:11px;margin-top:6px;letter-spacing:-.3px;margin-left:0}.creator-tags{margin-top:4px}.comparison-tray{bottom:16px;padding:10px 14px}.comparison-table th,.comparison-table td{padding:13px 15px}.comparison-table tbody td{max-width:270px;line-height:1.75}
+}

@@ -1,5 +1,5 @@
 import Papa from 'papaparse';
-import { CATEGORIES, PLATFORMS, TIERS, MIN_COHORT_SIZE, WEIGHTS, tierOf, tierLabel, moneyText } from './policy';
+import { CATEGORIES, PLATFORMS, TIERS, MIN_COHORT_SIZE, WEIGHTS, tierOf, moneyText } from './policy';
 import type { Category, Platform, Tier, SortKey, Weights } from './policy';
 
 export type Creator = {
@@ -13,7 +13,7 @@ export type Method = 'simple' | 'cohort';
 export type ComponentScore = { key: keyof Weights; label: string; normalized: number; weight: number; points: number; explanation: string };
 export type ScoredCreator = {
   creator: Creator; score: number; components: ComponentScore[];
-  cohort: { label: string; size: number; fallback: boolean };
+  cohort: { label: string; size: number; fallback: boolean; medians: { engagement: number; views: number } };
 };
 export type Alternative = { label: string; detail: string; count: number; input: MatchInput };
 export type MatchResult = {
@@ -86,10 +86,24 @@ function cohortFor(creator: Creator, all: readonly Creator[], method: Method) {
   if (method === 'simple') return { members: all, label: '전체 데이터', fallback: false };
   const tier = tierOf(creator.followers);
   const peer = all.filter(item => item.platform === creator.platform && tierOf(item.followers) === tier);
-  if (peer.length >= MIN_COHORT_SIZE) return { members: peer, label: creator.platform + ' · ' + tierLabel(tier), fallback: false };
+  if (peer.length >= MIN_COHORT_SIZE) return { members: peer, label: creator.platform + ' · 팔로워 ' + TIERS.find(t => t.id === tier)!.range, fallback: false };
   const platform = all.filter(item => item.platform === creator.platform);
   if (platform.length >= MIN_COHORT_SIZE) return { members: platform, label: creator.platform + ' 전체 규모', fallback: true };
   return { members: all, label: '전체 데이터', fallback: true };
+}
+
+export function median(values: readonly number[]): number {
+  if (!values.length) return 0;
+  const sorted = [...values].sort((a, b) => a - b);
+  const middle = Math.floor(sorted.length / 2);
+  return sorted.length % 2 ? sorted[middle] : (sorted[middle - 1] + sorted[middle]) / 2;
+}
+
+export function budgetEvidence(creator: Creator): string {
+  if (!hasKnownBudget(creator)) return '집행 이력이나 평균 비용이 없어 견적 확인이 필요합니다. 0원은 무료를 뜻하지 않습니다.';
+  return creator.averageBudget * creator.campaigns !== creator.totalBudget
+    ? '원본 누적액은 평균 비용 × 집행 건수와 일치하지 않습니다. 원본을 보존하고 제공된 평균 비용으로 예산을 비교합니다.'
+    : '과거 평균 비용을 예산 비교에 사용합니다. 현재 견적과 제작 범위는 별도로 확인해야 합니다.';
 }
 
 export function scoreCreator(creator: Creator, all: readonly Creator[], method: Method = 'cohort', weights: Weights = WEIGHTS): ScoredCreator {
@@ -105,11 +119,11 @@ export function scoreCreator(creator: Creator, all: readonly Creator[], method: 
   const explanations = {
     engagement: cohort.label + ' ' + cohort.members.length + '명 내 상대 위치 ' + engagement.toFixed(1) + '/100',
     views: cohort.label + ' ' + cohort.members.length + '명 내 상대 위치 ' + views.toFixed(1) + '/100',
-    rating: creator.rating === null ? '미평가 · 계산에만 중립 50/100 적용' : '관측 평점 ' + creator.rating.toFixed(1) + '/5 · 표본 수 미제공',
+    rating: creator.rating === null ? '미평가 · 계산 대체값 50/100 (평점 척도 중간값, 관측값 아님)' : '관측 평점 ' + creator.rating.toFixed(1) + '/5 · 표본 수 미제공',
     experience: creator.campaigns + '건 · 건수 증가에 따른 가산 폭을 줄여 반영',
   };
   const components = (Object.keys(weights) as (keyof Weights)[]).map(key => ({ key, label: labels[key], normalized: normalized[key], weight: weights[key], points: normalized[key] * weights[key], explanation: explanations[key] }));
-  return { creator, score: components.reduce((sum, component) => sum + component.points, 0), components, cohort: { label: cohort.label, size: cohort.members.length, fallback: cohort.fallback } };
+  return { creator, score: components.reduce((sum, component) => sum + component.points, 0), components, cohort: { label: cohort.label, size: cohort.members.length, fallback: cohort.fallback, medians: { engagement: median(cohort.members.map(item => item.engagement)), views: median(cohort.members.map(item => item.views)) } } };
 }
 
 export function sortMatches(items: readonly ScoredCreator[], sort: SortKey = 'recommended'): ScoredCreator[] {
@@ -132,7 +146,7 @@ export function recommend(all: readonly Creator[], input: MatchInput, method: Me
     }
     for (const tier of TIERS.filter(tier => tier.id !== input.sizeTier)) {
       const count = category.filter(creator => tierOf(creator.followers) === tier.id && hasKnownBudget(creator) && creator.averageBudget <= input.budgetKRW).length;
-      if (count) alternatives.push({ label: tier.label + ' 규모로 변경', detail: '예산·카테고리 유지 · ' + tier.range, count, input: { ...input, categories: [...input.categories], sizeTier: tier.id } });
+      if (count) alternatives.push({ label: '팔로워 ' + tier.range + '으로 변경', detail: '예산·분야 유지', count, input: { ...input, categories: [...input.categories], sizeTier: tier.id } });
     }
   }
   return { matched: sortMatches(eligible.map(creator => scoreCreator(creator, all, method, weights))), needsQuote, alternatives,

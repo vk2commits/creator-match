@@ -45,7 +45,7 @@ describe('견적과 빈 결과',()=>{
 
 describe('설명 가능한 점수',()=>{
   it('동점 중간 순위·단일집단을 처리한다',()=>{expect(percentile(1,[1,2,3])).toBe(0);expect(percentile(3,[1,2,3])).toBe(100);expect(percentile(2,[1,2,2,3])).toBe(50);expect(percentile(2,[2])).toBe(50);expect(percentile(2,[2,2])).toBe(50);});
-  it('평점 공란은 중립 계산과 미평가 설명을 갖는다',()=>{const r=scoreCreator(fixture({rating:null}),[fixture({rating:null})]);expect(r.components.find(c=>c.key==='rating')!.normalized).toBe(50);expect(r.components.find(c=>c.key==='rating')!.explanation).toContain('미평가');expect(r.creator.rating).toBeNull();});
+  it('평점 공란은 척도 중간 대체값 계산과 미평가 설명을 갖는다',()=>{const r=scoreCreator(fixture({rating:null}),[fixture({rating:null})]);expect(r.components.find(c=>c.key==='rating')!.normalized).toBe(50);expect(r.components.find(c=>c.key==='rating')!.explanation).toContain('미평가');expect(r.creator.rating).toBeNull();});
   it('모든 점수는 유한하고 구성요소 합과 같다',()=>{for(const creator of creators){const r=scoreCreator(creator,creators);expect(r.score).toBeGreaterThanOrEqual(0);expect(r.score).toBeLessThanOrEqual(100);expect(r.components.reduce((s,c)=>s+c.points,0)).toBeCloseTo(r.score,12);expect(r.cohort.size).toBeGreaterThanOrEqual(10);}});
   it('희소 집단은 플랫폼→전체로 명시적으로 대체한다',()=>{
     const all=Array.from({length:10},(_,i)=>fixture({id:String(i),followers:i===0?5000:15000}));
