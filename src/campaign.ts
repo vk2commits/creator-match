@@ -3,9 +3,9 @@ import type { Brief } from './experience';
 import { moneyText } from './policy';
 
 export const GOALS = [
-  {id:'awareness',label:'제품 알리기',detail:'콘텐츠가 얼마나 조회되는지',priority:'reach'},
-  {id:'engagement',label:'관심·반응 얻기',detail:'좋아요·댓글 등 반응이 생기는지',priority:'response'},
-  {id:'sales',label:'구매로 연결하기',detail:'클릭·구매는 집행 후 별도 기록',priority:'balanced'},
+  {id:'awareness',label:'제품 알리기',detail:'제품을 더 많은 사람에게 소개하고 싶어요',priority:'reach'},
+  {id:'engagement',label:'관심·반응 얻기',detail:'콘텐츠에 관심과 대화가 생기면 좋겠어요',priority:'response'},
+  {id:'sales',label:'구매로 연결하기',detail:'제품을 보고 실제 구매까지 이어지길 바라요',priority:'balanced'},
 ] as const;
 export type Goal = typeof GOALS[number]['id'];
 export type Campaign = { name: string; product: string; goal: Goal };
@@ -60,9 +60,9 @@ export function reportSummary(records:WorkRecords){
   const pairViews=pairs.reduce((s,o)=>s+o.views!,0);
   return {count:outcomes.length,views:views.reduce((s,o)=>s+o.views!,0),viewCount:views.length,cost:costs.reduce((s,o)=>s+o.cost!,0),costCount:costs.length,cpv:pairViews?pairs.reduce((s,o)=>s+o.cost!,0)/pairViews:null,pairCount:pairs.length};
 }
-export function inquiryDraft(c:Creator,brief:Brief,w:WorkRecord,reason:string){
+export function inquiryDraft(c:Creator,brief:Brief,w:WorkRecord,_reason:string){
   const campaign=campaignOf(brief);
-  return `안녕하세요, ${c.name}님.\n\n${campaign.name} 크리에이터 협업을 제안드립니다.\n${campaign.product?`소개할 제품·메시지: ${campaign.product}\n`:''}${reason?`협업을 검토한 이유: ${reason}\n`:''}\n희망 제작 범위: ${w.deliverable||'[콘텐츠 형식·수량 입력]'}\n게시 희망일: ${w.dueDate||'[일정 협의]'}\n콘텐츠 사용 범위: ${w.rights||'[2차 활용·광고 사용 여부 협의]'}\n검토 예산: 1명당 ${moneyText(brief.input.budgetKRW)} 이내\n\n해당 조건에서 진행 가능한 일정과 견적(부가세 포함 여부), 수정 범위, 콘텐츠 사용권을 알려주시면 검토 후 회신드리겠습니다. 감사합니다.`;
+  return `안녕하세요, ${c.name}님.\n\n「${campaign.name}」 캠페인의 콘텐츠 협업을 제안드립니다.\n${campaign.product?`소개할 제품·메시지: ${campaign.product}\n`:''}\n희망 제작 범위: ${w.deliverable||'[콘텐츠 형식·수량 입력]'}\n게시 희망일: ${w.dueDate||'[일정 협의]'}\n콘텐츠 사용 범위: ${w.rights||'[2차 활용·광고 사용 여부 협의]'}\n검토 예산: 1명당 ${moneyText(brief.input.budgetKRW)} 이내\n\n해당 조건에서 진행 가능한 일정과 견적(부가세 포함 여부), 수정 범위, 콘텐츠 사용권을 알려주시면 검토 후 회신드리겠습니다. 감사합니다.`;
 }
 export function readWork(raw:unknown):WorkRecords {
   if(!raw||typeof raw!=='object'||Array.isArray(raw))return {};

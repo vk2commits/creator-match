@@ -104,7 +104,7 @@ export function candidateCautions(c:Creator,brief:Brief):string[] {
   if(c.rating===null)facts.push('광고주 평가가 없습니다. 0점으로 평가한 것이 아닙니다.');
   return facts;
 }
-export function handoffMarkdown(creators:readonly Creator[],brief:Brief,all:readonly Creator[],notes:Notes,decisions:Decisions):string {
+export function handoffMarkdown(creators:readonly Creator[],brief:Brief,all:readonly Creator[],notes:Notes,decisions:Decisions,explain:(item:ScoredCreator)=>string=insight):string {
   const contacts=creators.filter(c=>decisions[c.id]==='contact'),p=criteriaOf(brief);
   const weightLine='참여율 '+Math.round(p.weights.engagement*100)+'%, 조회수 '+Math.round(p.weights.views*100)+'%, 평점 '+Math.round(p.weights.rating*100)+'%, 경험 '+Math.round(p.weights.experience*100)+'%';
   return '# 팀 검토안 · 견적 문의 후보\n\n'+contacts.length+'명을 견적 문의 대상으로 제안합니다. 실제 문의는 발송하지 않았습니다.\n\n'+
@@ -113,7 +113,7 @@ export function handoffMarkdown(creators:readonly Creator[],brief:Brief,all:read
     contacts.map(c=>{
       const eligible=candidateStatus(c,brief)==='조건 충족';
       const scored=eligible?scoreCreator(c,all,'cohort',p.weights):null;
-      const observation=scored?insight(scored)+' ('+scored.cohort.label+' 기준)':'현재 추천의 우선순위 비교에서 제외 — '+candidateStatus(c,brief);
+      const observation=scored?explain(scored):'현재 추천의 우선순위 비교에서 제외 — '+candidateStatus(c,brief);
       return '### '+cell(c.name)+' · '+c.platform+' · '+c.category+'\n\n'+
         '**문의 이유:** '+(notes[c.id]?.trim()?cell(notes[c.id]):'미작성')+'\n\n'+
         '- 팔로워 '+numberText(c.followers)+'명 / 평균 조회 '+numberText(c.views)+'회 / 참여율 '+c.engagement+'%\n'+

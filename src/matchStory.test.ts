@@ -1,0 +1,31 @@
+import {describe,it,expect} from 'vitest';
+import {readFileSync} from 'node:fs';
+import {parseCreators,scoreCreator,recommend} from './domain';
+import {matchStory,focusKeys,focusLabel} from './matchStory';
+import {criteriaOf} from './experience';
+import type {Brief} from './experience';
+import {DEFAULT_INPUT} from './policy';
+import {briefDemo,BRIEF_EXAMPLE} from './briefDemo';
+import {outreachDemo} from './assistantDemo';
+import {inquiryDraft,emptyWork} from './campaign';
+const all=parseCreators(readFileSync(new URL('../public/data/dummy_creators.csv',import.meta.url),'utf8'));
+const brief:Brief={input:DEFAULT_INPUT,priority:'reach',campaign:{name:'가을 캠페인',product:'립틴트',goal:'awareness'}};
+const story=(id:string,b=brief)=>matchStory(scoreCreator(all.find(c=>c.id===id)!,all,'cohort',criteriaOf(b).weights),b);
+describe('추천 설명과 실제 판단의 일치',()=>{
+ it('중요 지표는 실제 비중에서 정하고 같은 최고값을 모두 표시한다',()=>{expect(focusKeys(brief)).toEqual(['views']);expect(focusKeys({...brief,priority:'history'})).toEqual(['rating','experience']);expect(focusLabel({...brief,priority:'balanced'})).toBe('네 가지 지표를 고르게');});
+ it('실제 상위 후보의 분야·참고 비용·조회 강점을 연결한다',()=>{const s=story('C0077');expect(s.title).toBe('조회 실적이 돋보이는 후보');expect(s.category).toContain('패션');expect(s.budget).toContain('780,000원');expect(s.budget).toContain('2,000,000원');expect(s.eligible).toBe(true);});
+ it('0 비중인 지표를 중요 지표나 보조 강점으로 주장하지 않는다',()=>{const s=story('C0077',{...brief,customWeights:{engagement:0,views:0,rating:0,experience:1}});expect(s.key).toBe('experience');expect(s.summary).not.toContain('조회수');expect(s.summary).not.toContain('평점');});
+ it('예산 초과·미확인을 적합으로 포장하지 않는다',()=>{expect(story('C0077',{...brief,input:{...brief.input,budgetKRW:1}}).eligible).toBe(false);const s=story('C0036');expect(s.eligible).toBe(false);expect(s.budget).toContain('협업비를 문의');expect(s.next).toContain('협업 사례');expect(s.budget).not.toContain('0원');});
+ it('평점 공란을 좋은 평가로 해석하지 않는다',()=>{const s=story('C0036',{...brief,customWeights:{engagement:0,views:0,rating:1,experience:0}});expect(s.summary).toContain('아직 광고주 평가가 없어요');});
+ it('조회수 하위 후보를 높은 조회수라고 쓰지 않는다',()=>{const s=story('C0180');expect(s.summary).toContain('조회수는 낮은 편');expect(s.title).not.toContain('돋보이는');});
+ it('카테고리 변경 후 저장 후보의 자격을 다시 설명한다',()=>{const s=story('C0077',{...brief,input:{...brief.input,categories:['식품']}});expect(s.eligible).toBe(false);expect(s.category).toContain('다른 패션');});
+ it('구매 목표를 구매 예측이나 오디언스 적합성으로 바꾸지 않는다',()=>{const s=story('C0077',{...brief,campaign:{...brief.campaign!,goal:'sales'}});expect(s.context).toContain('구매를 유도할 캠페인');expect(s.summary).not.toMatch(/구매 확률|매출 예상|고객과 일치|성과 보장/);});
+ it('설명 조회는 점수·원본·순위에 영향을 주지 않는다',()=>{const before=JSON.stringify(all),rank=recommend(all,brief.input,'cohort',criteriaOf(brief).weights);for(const x of rank.matched)matchStory(x,brief);expect(JSON.stringify(all)).toBe(before);expect(recommend(all,brief.input,'cohort',criteriaOf(brief).weights)).toEqual(rank);});
+});
+describe('명시한 AI 시연의 적용 경계',()=>{
+ it('예시 문장을 예산·분야·규모·목표로 정리한다',()=>{const r=briefDemo(BRIEF_EXAMPLE);expect(r.brief.input).toEqual(DEFAULT_INPUT);expect(r.brief.priority).toBe('reach');expect(r.suggested).toEqual([]);});
+ it('총예산을 1명당 예산으로 몰래 해석하지 않는다',()=>{const r=briefDemo('전체 예산은 900만원이고 판매가 목표예요.');expect(r.brief.input.budgetKRW).toBe(DEFAULT_INPUT.budgetKRW);expect(r.suggested).toContain('1명당 예산');expect(r.brief.priority).toBe('balanced');});
+ it('미입력 조건은 제안으로 명시하고 기존 값과 구분한다',()=>{const r=briefDemo('댓글 반응을 보고 싶어요.',brief);expect(r.suggested).toEqual(['1명당 예산','분야','팔로워 수']);expect(r.brief.priority).toBe('response');expect(r.brief.campaign!.name).toBe('가을 캠페인');});
+ it('내부 선정 이유와 비교 가격은 외부 문의 문안에 자동 포함하지 않는다',()=>{expect(inquiryDraft(all[0],brief,emptyWork(),'내부 평점 비교·가격 협상 전략')).not.toContain('내부 평점');});
+ it('문안 다듬기는 금액·일정·사용권·직접 쓴 문장을 보존한다',()=>{const w={...emptyWork(),dueDate:'2026-10-03',rights:'30일 재게시',deliverable:'영상 1편'};const text=inquiryDraft(all[0],brief,w,'팀 내부의 선정 이유')+'\n패키지 표현이 필요합니다.\n직접 추가한 필수 문장';for(const tone of ['짧게','정중하게']){const result=outreachDemo(text,tone);for(const fact of ['2026-10-03','30일 재게시','영상 1편','2,000,000원','패키지 표현이 필요합니다.','직접 추가한 필수 문장'])expect(result).toContain(fact);}});
+});

@@ -1,28 +1,31 @@
 import {useEffect,useRef,useState} from 'react';
-import {ASSISTANT_INSTRUCTIONS,ASSISTANT_LABELS,assistantPrompt,parseAssistantResult} from './assistant';
-import type {AssistantMode,AssistantResult} from './assistant';
+import type {AssistantMode} from './assistant';
+import {numberText} from './policy';
 import {Icon} from './ui';
-export function AssistantPanel({mode,context,onApply}:{mode:AssistantMode;context:string;onApply?:(text:string)=>void}) {
-  const [configured,setConfigured]=useState<boolean|null>(null),[request,setRequest]=useState(mode==='brief'?'제품과 목표가 드러나도록 짧은 캠페인 브리프를 정리해 주세요.':mode==='outreach'?'견적과 일정을 확인하는 정중하고 간결한 문의 문안으로 다듬어 주세요.':'결과를 요약하고 다음 협업 전에 확인할 질문을 정리해 주세요.');
-  const [pending,setPending]=useState(false),[result,setResult]=useState<AssistantResult|null>(null),[error,setError]=useState(''),[status,setStatus]=useState('');
-  const abort=useRef<AbortController|null>(null);const requestId=useRef(0);
-  const check=()=>{setConfigured(null);fetch('/api/assistant/status').then(r=>r.ok?r.json():null).then(r=>setConfigured(r?.configured===true)).catch(()=>setConfigured(false));};
-  useEffect(()=>{check();return()=>{requestId.current++;abort.current?.abort();};},[]);
-  useEffect(()=>{requestId.current++;abort.current?.abort();setPending(false);setResult(null);setError('');setStatus('');},[context]);
-  const generate=async()=>{
-    const id=++requestId.current;abort.current?.abort();const controller=new AbortController();abort.current=controller;setPending(true);setError('');setResult(null);setStatus('');
-    try{const response=await fetch('/api/assistant',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode,context,request}),signal:controller.signal});const payload=await response.json();if(!response.ok)throw new Error(payload.error||'AI 연결을 확인해 주세요.');if(id===requestId.current)setResult(parseAssistantResult(payload));}
-    catch(e){if(id===requestId.current&&!controller.signal.aborted)setError(e instanceof Error?e.message:'생성하지 못했습니다. 다시 시도해 주세요.');}
-    finally{if(id===requestId.current)setPending(false);}
-  };
-  const copy=async()=>{try{await navigator.clipboard.writeText(ASSISTANT_INSTRUCTIONS+'\n\n'+assistantPrompt(mode,context,request));setStatus('요청문을 복사했습니다. 사용하는 AI에 붙여 넣을 수 있어요.');}catch{setStatus('복사가 제한되어 있습니다. 아래 요청문을 펼쳐 직접 복사해 주세요.');}};
-  return <section className="assistant-panel"><div className="assistant-heading"><span className="ai-symbol">✦</span><div><h3>{ASSISTANT_LABELS[mode]}</h3><p>AI 초안을 검토하고 내 문안으로 수정하세요.</p></div><span className="ai-state">{configured===null?'연결 확인 중':configured?'AI 연결됨':'연결 필요'}</span></div>
-    {configured===false&&<div className="ai-connection"><p>아직 AI가 연결되지 않았어요. 연결 후 이 화면에서 바로 생성할 수 있습니다.</p><details><summary>연결 방법 보기</summary><p>로컬 실행 폴더의 .env.local에 OPENAI_API_KEY를 설정하고 앱을 다시 실행하세요. 키는 서버에서만 사용합니다. 자세한 설정은 README의 AI 연결 안내를 확인하세요.</p></details><button className="text-button" onClick={check}>연결 다시 확인</button></div>}
-    <label className="field-label">AI에게 요청할 내용<textarea maxLength={3000} value={request} onChange={e=>setRequest(e.target.value)} disabled={pending}/></label>
-    <details className="ai-context"><summary>AI에 전달할 자료 확인</summary><pre>{context}</pre></details>
-    <div className="assistant-actions"><button className="ai-button" disabled={!configured||pending||!request.trim()} onClick={generate}>{pending?'문안 작성 중…':'✦ AI로 생성'}</button>{pending?<button className="text-button" onClick={()=>{requestId.current++;abort.current?.abort();setPending(false);setStatus('생성을 중단했습니다.');}}>중단</button>:<button className="text-button" onClick={copy}>요청문 복사</button>}</div><p className="muted">생성을 누르면 위 자료와 요청을 OpenAI로 보냅니다. 추천 순위·협업 상태는 자동으로 바뀌지 않습니다.</p>
-    {pending&&<p role="status" className="ai-pending"><span className="spinner"/>입력한 자료를 바탕으로 초안을 작성하고 있어요.</p>}{error&&<p role="alert" className="error-text">{error}</p>}{status&&<p role="status">{status}</p>}
-    {result&&<div className="ai-result"><label className="field-label">생성된 초안 · 직접 수정 가능<textarea value={result.text} onChange={e=>setResult({...result,text:e.target.value})}/></label>{result.questions.length>0&&<><h4>추가로 확인할 질문</h4><ul>{result.questions.map((q,i)=><li key={i}>{q}</li>)}</ul></>}{onApply?<button className="secondary-button" disabled={!result.text.trim()} onClick={()=>onApply(result.text)}>검토한 문안 적용<Icon name="check" size={16}/></button>:<button className="secondary-button" onClick={async()=>{try{await navigator.clipboard.writeText(result.text);setStatus('요약을 복사했습니다.');}catch{setStatus('초안을 선택해 직접 복사해 주세요.');}}}>요약 복사</button>}<p className="muted">AI 작성 초안입니다. 원자료와 대조한 뒤 사용하세요.</p></div>}
-    <details className="ai-context"><summary>다른 AI에서 사용할 요청문</summary><textarea readOnly value={ASSISTANT_INSTRUCTIONS+'\n\n'+assistantPrompt(mode,context,request)} aria-label="복사용 AI 요청문"/></details>
+import {outreachDemo} from './assistantDemo';
+
+// Explicit demonstration, with no API requirement or external data transmission.
+export function AssistantPanel({mode,context,onApply}:{mode:AssistantMode;context:string;onApply?:(text:string)=>void}){
+  const [pending,setPending]=useState(false),[result,setResult]=useState(''),[tone,setTone]=useState('정중하게'),[status,setStatus]=useState('');
+  const timer=useRef<ReturnType<typeof setTimeout>|null>(null);
+  useEffect(()=>()=>{if(timer.current)clearTimeout(timer.current);},[]);
+  useEffect(()=>{if(timer.current)clearTimeout(timer.current);setResult('');setPending(false);setStatus('');},[context,tone]);
+  const analysis=mode==='analysis';
+  const generate=()=>{setPending(true);setResult('');timer.current=setTimeout(()=>{
+    if(analysis){
+      try{const data=JSON.parse(context);const rows=data.results as {name:string;outcome:{views:number|null;cost:number|null;clicks:number|null;conversions:number|null};calculated:{cpv:number|null;cpa:number|null}}[];
+        setResult(rows.map(r=>`${r.name}\n${r.outcome.views===null?'조회수는 아직 입력하지 않았어요.':`콘텐츠 조회수는 ${numberText(r.outcome.views)}회입니다.`} ${r.outcome.cost===null?'집행비를 입력하면 비용 대비 결과를 볼 수 있어요.':`집행비는 ${numberText(r.outcome.cost)}원입니다.`}\n${r.calculated.cpv===null?'조회수와 집행비가 모두 있어야 조회 1회당 비용을 알 수 있어요.':`조회 1회당 ${numberText(Math.round(r.calculated.cpv*100)/100)}원을 사용했어요.`}${r.outcome.conversions!==null?` 기록된 구매는 ${numberText(r.outcome.conversions)}건입니다.`:''}\n다음 협업 전: 같은 기간으로 집계한 다른 콘텐츠와 비용을 비교해 보세요.`).join('\n\n'));
+      }catch{setResult('성과를 먼저 입력해 주세요. 조회수와 집행비부터 시작할 수 있어요.');}
+    }else{
+      setResult(outreachDemo(context,tone));
+    }
+    setPending(false);
+  },900);};
+  return <section className="assistant-panel"><div className="assistant-heading"><span className="ai-symbol">✦</span><div><h3>{analysis?'숫자를 팀에 설명할 한 문단으로':'첫 문의, 보낼 문장으로 다듬기'}</h3><p>{analysis?'입력한 조회수와 집행비를 읽기 쉽게 정리합니다.':'제품·예산·제작 조건을 가져왔어요. 원하는 말투를 골라주세요.'}</p></div><span className="ai-state">AI 시연</span></div>
+    {!analysis&&<div className="preset-options" aria-label="문의 문안 말투">{['정중하게','짧게'].map(t=><button key={t} aria-pressed={tone===t} onClick={()=>setTone(t)}>{t}</button>)}</div>}
+    {!result&&<button className="ai-button" disabled={pending} onClick={generate}>{pending?'내용을 정리하고 있어요…':analysis?'✦ 결과 요약 만들기':'✦ 문의 초안 만들기'}</button>}
+    {pending&&<div className="ai-pending" role="status"><span className="spinner"/>{analysis?'성과 기록을 읽기 쉬운 문장으로 바꾸고 있어요.':'선택한 말투로 문의 내용을 정리하고 있어요.'}</div>}
+    {result&&<div className="ai-result"><label className="field-label">{analysis?'팀 공유용 요약':'보낼 문안 확인'}<textarea value={result} onChange={e=>setResult(e.target.value)}/></label><div className="form-actions"><button className="text-button" onClick={generate}>다시 만들기</button>{onApply?<button className="primary-button" onClick={()=>onApply(result)} disabled={!result.trim()}>이 문안 사용하기<Icon name="check" size={16}/></button>:<button className="primary-button" onClick={async()=>{try{await navigator.clipboard.writeText(result);setStatus('요약을 복사했어요. 팀 문서에 붙여 넣어보세요.');}catch{setStatus('문장을 선택해서 복사해 주세요.');}}}>요약 복사하기</button>}</div></div>}
+    <p role="status">{status}</p><p className="assistant-demo-foot">AI 기능 체험용 예시입니다. 입력한 정보로 초안을 만들며, 적용 전에 수정할 수 있어요.</p>
   </section>;
 }
