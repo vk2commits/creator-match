@@ -8,8 +8,16 @@ export const TIERS = [
   { id: 'macro', label: '매크로', range: '10만 이상', min: 100_000, max: Infinity },
 ] as const;
 export type Tier = typeof TIERS[number]['id'];
-export const WEIGHTS = { engagement: 0.35, views: 0.35, rating: 0.20, experience: 0.10 } as const;
+export const WEIGHTS = { engagement: 0.25, views: 0.25, rating: 0.25, experience: 0.25 } as const;
 export type Weights = { -readonly [K in keyof typeof WEIGHTS]: number };
+export const PRIORITIES = [
+  { id: 'response', label: '콘텐츠 반응', title: '반응이 활발한 채널', description: '참여율을 우선해 콘텐츠에 대한 반응을 살펴봐요.', icon: 'reaction', weights: { engagement: .5, views: .25, rating: .15, experience: .1 } },
+  { id: 'reach', label: '조회 규모', title: '조회가 잘 나오는 채널', description: '같은 플랫폼·규모에서 평균 조회수가 높은 후보를 먼저 봐요.', icon: 'views', weights: { engagement: .2, views: .55, rating: .15, experience: .1 } },
+  { id: 'history', label: '협업 이력', title: '협업 경험이 많은 채널', description: '광고 집행 경험과 광고주 평점을 함께 살펴봐요.', icon: 'history', weights: { engagement: .2, views: .2, rating: .3, experience: .3 } },
+  { id: 'balanced', label: '균등 비교', title: '네 가지 지표를 고르게', description: '아직 우선순위가 없다면 모든 지표를 같은 비중으로 봐요.', icon: 'balance', weights: WEIGHTS },
+] as const;
+export type Priority = typeof PRIORITIES[number]['id'];
+export const priorityOf = (id: Priority) => PRIORITIES.find(p => p.id === id)!;
 export const MIN_COHORT_SIZE = 10;
 export const SOURCE_SHA256 = '6f139b1a8cac4a7aa0d8034bde2df16ae7c06896ee820eec16ddafbcf2738b8c';
 export const SORT_OPTIONS = [

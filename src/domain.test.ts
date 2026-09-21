@@ -26,7 +26,8 @@ describe('원본과 CSV',()=>{
 });
 
 describe('입력과 경계',()=>{
-  it.each(['','0','-1','1.2','1e6','1,000','Infinity','NaN','9007199254740992'])('%s는 유효 예산이 아니다',raw=>{expect(validateInput({...input,budgetKRW:parseBudget(raw)}).budget).toBeTruthy();});
+  it.each(['','0','-1','1.2','1e6','1,00','Infinity','NaN','9007199254740992'])('%s는 유효 예산이 아니다',raw=>{expect(validateInput({...input,budgetKRW:parseBudget(raw)}).budget).toBeTruthy();});
+  it('천 단위 구분을 입력과 붙여넣기에 허용한다',()=>{expect(parseBudget('2,000,000')).toBe(2000000);expect(parseBudget('2000000')).toBe(2000000);});
   it('정수 1원·공백 정리를 허용한다',()=>{expect(parseBudget(' 1 ')).toBe(1);expect(validateInput({...input,budgetKRW:1})).toEqual({});});
   it('카테고리 미선택과 잘못된 규모를 거절한다',()=>{expect(validateInput({...input,categories:[]})).toHaveProperty('categories');expect(()=>recommend(creators,{...input,sizeTier:'bad' as never})).toThrow();});
   it.each([[9999,'nano'],[10000,'micro'],[99999,'micro'],[100000,'macro']] as const)('%i명은 %s', (n,tier)=>expect(tierOf(n)).toBe(tier));

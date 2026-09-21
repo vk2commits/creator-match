@@ -69,7 +69,8 @@ export function validateInput(input: MatchInput): InputErrors {
 
 export function parseBudget(raw: string): number {
   // Empty values, decimals and exponent notation are not silently converted.
-  return /^\d+$/.test(raw.trim()) ? Number(raw.trim()) : NaN;
+  const value = raw.trim();
+  return /^(?:\d+|\d{1,3}(?:,\d{3})+)$/.test(value) ? Number(value.replaceAll(',', '')) : NaN;
 }
 
 export const hasKnownBudget = (creator: Creator) => creator.campaigns > 0 && creator.averageBudget > 0;

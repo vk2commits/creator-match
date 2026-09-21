@@ -1,7 +1,7 @@
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { parseCreators, recommend, hasKnownBudget } from '../src/domain';
-import { CATEGORIES, TIERS, WEIGHTS, SOURCE_SHA256, DEFAULT_INPUT, tierOf } from '../src/policy';
+import { CATEGORIES, TIERS, WEIGHTS, SOURCE_SHA256, DEFAULT_INPUT, PRIORITIES, tierOf } from '../src/policy';
 import type { Weights } from '../src/policy';
 
 const raw = readFileSync(new URL('../public/data/dummy_creators.csv', import.meta.url));
@@ -75,7 +75,7 @@ for(const input of scenarios){
 const demo=recommend(all,DEFAULT_INPUT).matched.slice(0,5);
 const evaluation={scenarios:scenarios.length,nonempty,violations,changedA,changedB,meanTop3Overlap:mean(overlap),sensitivityComparisons,sensitivityTop1Changes,sensitivityMeanTop3Overlap:mean(sensitivityOverlaps),exampleChanges,demo};
 writeFileSync('docs/evaluation.json',JSON.stringify({audit,evaluation},null,2)+'\n');
-writeFileSync('docs/EVALUATION.md','# 추천 방식 비교와 민감도\n\n`npm run analyze`로 원본 전체와 동일한 추천 함수를 사용해 재생성한다. 정답 성과가 없으므로 정확도·매출 개선 실험이 아니다.\n\n'
+writeFileSync('docs/EVALUATION.md','# 추천 방식 비교와 민감도\n\n`npm run analyze`로 원본 전체와 동일한 추천 함수를 사용해 재생성한다. 현재 균등 비교(25/25/25/25)의 실험이다. 정답 성과가 없으므로 정확도·매출 개선 실험이 아니다.\n\n'
   +'## 비교 설계\n\nA는 적격 후보의 팔로워순, B는 전체 데이터 상대 위치를 쓰는 가중 점수, C는 플랫폼×규모 집단의 상대 위치를 쓰는 같은 가중 점수다. 세 방식 모두 동일한 예산·카테고리·규모 필터와 견적 미확인 분리 정책을 적용한다. 일부러 결함 있는 기준과 비교하지 않는다.\n\n'
   +'10개 단일 카테고리 × 3개 규모 × 5개 예산(1 / 300,000 / 1,000,000 / 2,000,000 / 10,000,000원) = '+scenarios.length+'개 조건. 다중 카테고리는 별도 단위·브라우저 테스트에서 검증한다.\n\n'
   +'| 측정 | 결과 | 의미 |\n|---|---:|---|\n'
@@ -93,4 +93,10 @@ writeFileSync('docs/EVALUATION.md','# 추천 방식 비교와 민감도\n\n`npm 
   +demo.map(x=>'| '+[x.creator.id,x.creator.name,x.creator.platform,x.score.toFixed(1),...x.components.map(c=>c.points.toFixed(2))].join(' | ')+' |').join('\n')
   +'\n\n## 선택과 한계\n\nC를 채택한다. 플랫폼별 지표 정의가 같다고 가정하지 않고, 모든 후보에 비교 집단과 표본 수를 설명할 수 있다는 제품상의 이점이 있다. 실험에서 C가 실제 캠페인 성과를 개선한다고 입증한 것은 아니다. 상대 순위가 절대 차이를 줄이고, 카테고리·기간 차이를 해소하지 못하며, 작은 집단의 단일 관측치 변화에 민감할 수 있다. 원지표와 개별 정렬을 유지한다. 더 많은 실제 성과 데이터가 생기기 전에는 수식을 복잡하게 확장하지 않는다.\n');
 console.log(JSON.stringify({rows:all.length,hash,scenarios:scenarios.length,nonempty,violations,changedA,changedB,sensitivityTop1Changes,sensitivityComparisons,demo:demo.map(x=>({id:x.creator.id,name:x.creator.name,score:x.score}))},null,2));
-
+const priorityRows=PRIORITIES.map(p=>{const r=recommend(all,DEFAULT_INPUT,'cohort',p.weights);return {label:p.label,weights:p.weights,top3:r.matched.slice(0,3).map(x=>x.creator.name),count:r.matched.length};});
+let priorityNonempty=0,priorityChanged=0;
+for(const category of CATEGORIES)for(const tier of TIERS)for(const budgetKRW of [1,300000,1000000,2000000,10000000]){
+  const input={budgetKRW,categories:[category],sizeTier:tier.id};const rankings=PRIORITIES.map(p=>recommend(all,input,'cohort',p.weights).matched);
+  if(rankings[0].length){priorityNonempty++;if(new Set(rankings.map(r=>r[0].creator.id)).size>1)priorityChanged++;}
+}
+writeFileSync('docs/PRIORITY_EVALUATION.md','# 추천 우선순위 비교\n\n첫 방문에서 사용자가 기준을 선택한다. 예시 우회는 균등 비교를 명시한다. 모든 비중은 목적을 표현한 설계 가정이며 성과 최적화 결과가 아니다. `npm run analyze`로 재생성한다.\n\n| 기준 | 참여율/조회/평점/경험 | 1위 | 2위 | 3위 | 적격 수 |\n|---|---|---|---|---|---:|\n'+priorityRows.map(r=>'| '+r.label+' | '+Object.values(r.weights).map(n=>n*100).join('/')+' | '+r.top3.join(' | ')+' | '+r.count+' |').join('\n')+'\n\n예시: 뷰티·패션, 마이크로, 200만원. 150조건 중 비어 있지 않은 '+priorityNonempty+'조건에서 '+priorityChanged+'조건은 선택 기준에 따라 1위가 달랐다. 기준별 적격 집합은 같고 순서만 바뀐다. 네 기준×150조건의 적격성·계산 합계는 자동 테스트에서 확인했다.\n\n조회 규모는 같은 플랫폼·규모 내 상대 조회 위치이며 절대 조회수 최대화와 다르다. 균등 비교도 중립적인 정답은 아니다. 카테고리 적합도·현재 비용·실제 전환 등 없는 데이터를 가산하지 않는다. 목표별 가중치의 최적성과 사용자 선택 시간 개선은 아직 검증하지 않았다.\n');
