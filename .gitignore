@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.vite/
+.sites-runtime/
+.openai/
+test-results/
+playwright-report/
+.env
+.env.*
+*.log
+.DS_Store
+
