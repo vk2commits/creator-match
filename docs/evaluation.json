@@ -177,7 +177,7 @@
             "normalized": 16.10169491525424,
             "weight": 0.25,
             "points": 4.02542372881356,
-            "explanation": "인스타그램 · 마이크로 60명 내 상대 위치 16.1/100"
+            "explanation": "인스타그램 · 팔로워 1만–10만 미만 60명 내 상대 위치 16.1/100"
           },
           {
             "key": "views",
@@ -185,7 +185,7 @@
             "normalized": 94.91525423728814,
             "weight": 0.25,
             "points": 23.728813559322035,
-            "explanation": "인스타그램 · 마이크로 60명 내 상대 위치 94.9/100"
+            "explanation": "인스타그램 · 팔로워 1만–10만 미만 60명 내 상대 위치 94.9/100"
           },
           {
             "key": "rating",
@@ -205,9 +205,13 @@
           }
         ],
         "cohort": {
-          "label": "인스타그램 · 마이크로",
+          "label": "인스타그램 · 팔로워 1만–10만 미만",
           "size": 60,
-          "fallback": false
+          "fallback": false,
+          "medians": {
+            "engagement": 7.4,
+            "views": 8662.5
+          }
         }
       },
       {
@@ -232,7 +236,7 @@
             "normalized": 59.32203389830509,
             "weight": 0.25,
             "points": 14.830508474576272,
-            "explanation": "인스타그램 · 마이크로 60명 내 상대 위치 59.3/100"
+            "explanation": "인스타그램 · 팔로워 1만–10만 미만 60명 내 상대 위치 59.3/100"
           },
           {
             "key": "views",
@@ -240,7 +244,7 @@
             "normalized": 47.45762711864407,
             "weight": 0.25,
             "points": 11.864406779661017,
-            "explanation": "인스타그램 · 마이크로 60명 내 상대 위치 47.5/100"
+            "explanation": "인스타그램 · 팔로워 1만–10만 미만 60명 내 상대 위치 47.5/100"
           },
           {
             "key": "rating",
@@ -260,9 +264,13 @@
           }
         ],
         "cohort": {
-          "label": "인스타그램 · 마이크로",
+          "label": "인스타그램 · 팔로워 1만–10만 미만",
           "size": 60,
-          "fallback": false
+          "fallback": false,
+          "medians": {
+            "engagement": 7.4,
+            "views": 8662.5
+          }
         }
       },
       {
@@ -287,7 +295,7 @@
             "normalized": 50.73529411764706,
             "weight": 0.25,
             "points": 12.683823529411764,
-            "explanation": "유튜브 · 마이크로 69명 내 상대 위치 50.7/100"
+            "explanation": "유튜브 · 팔로워 1만–10만 미만 69명 내 상대 위치 50.7/100"
           },
           {
             "key": "views",
@@ -295,7 +303,7 @@
             "normalized": 61.76470588235294,
             "weight": 0.25,
             "points": 15.441176470588236,
-            "explanation": "유튜브 · 마이크로 69명 내 상대 위치 61.8/100"
+            "explanation": "유튜브 · 팔로워 1만–10만 미만 69명 내 상대 위치 61.8/100"
           },
           {
             "key": "rating",
@@ -315,9 +323,13 @@
           }
         ],
         "cohort": {
-          "label": "유튜브 · 마이크로",
+          "label": "유튜브 · 팔로워 1만–10만 미만",
           "size": 69,
-          "fallback": false
+          "fallback": false,
+          "medians": {
+            "engagement": 7.3,
+            "views": 5566
+          }
         }
       },
       {
@@ -342,7 +354,7 @@
             "normalized": 42.64705882352941,
             "weight": 0.25,
             "points": 10.661764705882353,
-            "explanation": "유튜브 · 마이크로 69명 내 상대 위치 42.6/100"
+            "explanation": "유튜브 · 팔로워 1만–10만 미만 69명 내 상대 위치 42.6/100"
           },
           {
             "key": "views",
@@ -350,7 +362,7 @@
             "normalized": 69.11764705882354,
             "weight": 0.25,
             "points": 17.279411764705884,
-            "explanation": "유튜브 · 마이크로 69명 내 상대 위치 69.1/100"
+            "explanation": "유튜브 · 팔로워 1만–10만 미만 69명 내 상대 위치 69.1/100"
           },
           {
             "key": "rating",
@@ -370,9 +382,13 @@
           }
         ],
         "cohort": {
-          "label": "유튜브 · 마이크로",
+          "label": "유튜브 · 팔로워 1만–10만 미만",
           "size": 69,
-          "fallback": false
+          "fallback": false,
+          "medians": {
+            "engagement": 7.3,
+            "views": 5566
+          }
         }
       },
       {
@@ -397,7 +413,7 @@
             "normalized": 75,
             "weight": 0.25,
             "points": 18.75,
-            "explanation": "유튜브 · 마이크로 69명 내 상대 위치 75.0/100"
+            "explanation": "유튜브 · 팔로워 1만–10만 미만 69명 내 상대 위치 75.0/100"
           },
           {
             "key": "views",
@@ -405,7 +421,7 @@
             "normalized": 63.23529411764706,
             "weight": 0.25,
             "points": 15.808823529411764,
-            "explanation": "유튜브 · 마이크로 69명 내 상대 위치 63.2/100"
+            "explanation": "유튜브 · 팔로워 1만–10만 미만 69명 내 상대 위치 63.2/100"
           },
           {
             "key": "rating",
@@ -425,9 +441,13 @@
           }
         ],
         "cohort": {
-          "label": "유튜브 · 마이크로",
+          "label": "유튜브 · 팔로워 1만–10만 미만",
           "size": 69,
-          "fallback": false
+          "fallback": false,
+          "medians": {
+            "engagement": 7.3,
+            "views": 5566
+          }
         }
       }
     ]

@@ -7,7 +7,7 @@
   "evidence": [
     {
       "id": "response",
-      "label": "콘텐츠 반응",
+      "label": "참여율 우선",
       "conditions": 47,
       "comparisons": 376,
       "top1Changed": 20,
@@ -22,7 +22,7 @@
     },
     {
       "id": "reach",
-      "label": "조회 규모",
+      "label": "조회수 우선",
       "conditions": 47,
       "comparisons": 376,
       "top1Changed": 23,
@@ -37,7 +37,7 @@
     },
     {
       "id": "history",
-      "label": "협업 이력",
+      "label": "협업 이력 우선",
       "conditions": 47,
       "comparisons": 376,
       "top1Changed": 17,
@@ -323,9 +323,14 @@
     "scoreCohort": {
       "label": "유튜브 전체 규모",
       "size": 20,
-      "fallback": true
+      "fallback": true,
+      "medians": {
+        "engagement": 7.25,
+        "views": 8500
+      }
     },
-    "currentUiExactPeerMedian": 150,
+    "previousUiExactPeerMedian": 150,
+    "currentSharedMedian": 8500,
     "actualScoreCohortMedian": 8500,
     "originalUnknownWithEqualBudgetFields": 27
   }
