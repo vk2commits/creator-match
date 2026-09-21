@@ -1,22 +1,24 @@
+import { readWork } from './campaign';
+import type { Campaign, WorkRecords } from './campaign';
 import { budgetEvidence, hasKnownBudget, scoreCreator, validateInput } from './domain';
 import type { Creator, MatchInput, ScoredCreator } from './domain';
 import { PRIORITIES, priorityOf, moneyText, numberText, tierOf, tierRange } from './policy';
 import type { Priority, Weights } from './policy';
 import { validWeights } from './weights';
 
-export type Brief = { input: MatchInput; priority: Priority; customWeights?: Weights };
+export type Brief = { input: MatchInput; priority: Priority; customWeights?: Weights; campaign?: Campaign };
 export type Notes = Record<string, string>;
 export type Decision = 'review' | 'contact' | 'hold';
 export type Decisions = Record<string, Decision>;
 export const decisionLabel = (d?:Decision) => d==='contact'?'문의 후보':d==='hold'?'보류':'검토 중';
 export const criteriaOf = (brief:Brief) => brief.customWeights ? {...priorityOf(brief.priority),label:'직접 설정',icon:'balance',weights:brief.customWeights} : priorityOf(brief.priority);
-export type SavedSession = { version: 4; brief: Brief; selected: string[]; compared: string[]; notes: Notes; decisions: Decisions };
+export type SavedSession = { version: 5; work: WorkRecords; brief: Brief; selected: string[]; compared: string[]; notes: Notes; decisions: Decisions };
 // Keep the key to migrate existing saved candidates without resetting them.
 export const STORAGE_KEY = 'creator-match-v2';
 export function readSession(raw: string | null): SavedSession | null {
   try {
     const data = JSON.parse(raw ?? 'null');
-    if (![2, 3, 4].includes(data?.version) || !data.brief || !PRIORITIES.some(p => p.id === data.brief.priority)) return null;
+    if (![2, 3, 4, 5].includes(data?.version) || !data.brief || !PRIORITIES.some(p => p.id === data.brief.priority)) return null;
     if(data.brief.customWeights!==undefined&&!validWeights(data.brief.customWeights))return null;
     const input = data.brief.input;
     if (!input || !Array.isArray(input.categories) || Object.keys(validateInput(input)).length) return null;
@@ -26,7 +28,9 @@ export function readSession(raw: string | null): SavedSession | null {
       ? [...new Set<string>(data.compared.filter((id: unknown) => typeof id === 'string' && selected.includes(id)))].slice(0, 3) : [];
     const notes = Object.fromEntries(Object.entries(data.notes ?? {}).filter(([id, value]) => selected.includes(id) && typeof value === 'string').map(([id, value]) => [id, (value as string).slice(0, 500)]));
     const decisions=Object.fromEntries(Object.entries(data.decisions??{}).filter(([id,d])=>selected.includes(id)&&['review','contact','hold'].includes(d as string))) as Decisions;
-    return { version: 4, brief: data.brief, selected, compared, notes, decisions };
+    const campaign=data.brief.campaign;
+    if(campaign&&(typeof campaign.name!=='string'||typeof campaign.product!=='string'||!['awareness','engagement','sales'].includes(campaign.goal)))delete data.brief.campaign;
+    return { version: 5, work: readWork(data.work), brief: data.brief, selected, compared, notes, decisions };
   } catch { return null; }
 }
 export function toggleCompared(ids: readonly string[], id: string): string[] {

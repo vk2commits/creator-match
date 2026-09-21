@@ -1,0 +1,21 @@
+import {describe,it,expect} from 'vitest';
+import {exampleWork,emptyWork,emptyOutcome,efficiencies,reportSummary,workErrors,outcomeErrors,parseMetric,readWork,safeUrl,inquiryDraft} from './campaign';
+import {parseCreators} from './domain';
+import {readSession} from './experience';
+import {DEFAULT_INPUT} from './policy';
+import {readFileSync} from 'node:fs';
+const creator=parseCreators(readFileSync(new URL('../public/data/dummy_creators.csv',import.meta.url),'utf8'))[0];
+const brief={input:DEFAULT_INPUT,priority:'balanced' as const,campaign:{name:'테스트 캠페인',product:'제품의 사용감',goal:'awareness' as const}};
+const outcome=()=>({...emptyOutcome(),cost:100000,views:10000,likes:100,comments:20,shares:10,saves:20,clicks:500,conversions:10,revenue:200000,measuredAt:'2026-09-21',source:'검증용 직접 입력',attribution:'전용 코드 7일'});
+describe('협업에서 관측 결과까지',()=>{
+  it('예시 리포트는 실제 기록을 만들지 않으며 수정 문안은 복원된다',()=>{const a=exampleWork();a.outcome.views=999;expect(exampleWork().outcome.views).toBe(10000);expect(emptyWork().outcome.views).toBeNull();expect(readWork({C0001:{...emptyWork(),message:'직접 수정한 문안'}}).C0001.message).toBe('직접 수정한 문안');});
+  it('공란·0·음수·소수·잘못된 숫자를 구분한다',()=>{expect(parseMetric('')).toBeNull();expect(parseMetric('0')).toBe(0);expect(parseMetric('100,000')).toBe(100000);for(const s of ['-1','1.2','NaN','abc','Infinity'])expect(parseMetric(s)).toBeNaN();});
+  it('문안 생성은 연락 상태를 바꾸지 않고 미확인 조건을 유지한다',()=>{const w=emptyWork();const before=structuredClone(w);const text=inquiryDraft(creator,brief,w,'테스트 이유');expect(text).toContain('테스트 캠페인');expect(text).toContain('제작 범위');expect(text).toContain('[일정 협의]');expect(w).toEqual(before);expect(w.stage).toBe('draft');});
+  it('연락 날짜 없이 답변 대기를 저장하지 않고 협업은 합의 조건이 필요하다',()=>{expect(workErrors({...emptyWork(),stage:'contacted'})).toContain('실제로 문의한 날짜를 기록해 주세요.');expect(workErrors({...emptyWork(),stage:'active',contactedAt:'2026-09-21'})).toContain('협업을 진행하려면 합의 비용과 제작 범위를 기록해 주세요.');expect(workErrors({...emptyWork(),stage:'active',contactedAt:'2026-09-21',deliverable:'1편',agreedCost:0})).toEqual([]);});
+  it('성과에 확인 날짜·출처·구매 집계 기준을 요구한다',()=>{expect(outcomeErrors(emptyOutcome())).toEqual([]);expect(outcomeErrors({...emptyOutcome(),views:0})).toHaveLength(2);expect(outcomeErrors({...outcome(),attribution:''})).toHaveLength(1);expect(outcomeErrors({...outcome(),measuredAt:'2026-02-30'})).toHaveLength(1);expect(outcomeErrors(outcome())).toEqual([]);});
+  it('허용되지 않은 링크를 차단한다',()=>{for(const s of ['javascript:alert(1)','data:text/html,hi','https://user:pass@example.com'])expect(safeUrl(s)).toBe(false);expect(safeUrl('https://example.com/video')).toBe(true);});
+  it('비용 효율은 관측된 분모로 계산한다',()=>{expect(efficiencies(outcome())).toEqual({cpv:10,cpe:100000/150,cpc:200,cpa:10000,roas:200,interactions:150});});
+  it('누락과 0 분모로 성과를 꾸며내지 않는다',()=>{const e=efficiencies({...emptyOutcome(),cost:100,views:0,likes:10,comments:10});expect(e.cpv).toBeNull();expect(e.cpe).toBeNull();expect(e.roas).toBeNull();expect(efficiencies({...outcome(),cost:0}).cpv).toBe(0);expect(efficiencies({...outcome(),cost:0}).roas).toBeNull();});
+  it('집계는 비용·조회수가 함께 있는 후보끼리만 나눈다',()=>{const report=reportSummary({C0001:{...emptyWork(),outcome:{...outcome(),cost:100,views:10}},C0002:{...emptyWork(),outcome:{...outcome(),cost:900,views:null}},C0003:{...emptyWork(),outcome:{...outcome(),cost:null,views:1000}}});expect(report.cost).toBe(1000);expect(report.views).toBe(1010);expect(report.cpv).toBe(10);expect(report.pairCount).toBe(1);expect(report.viewCount).toBe(2);});
+  it('과거 저장을 복구하면서 보관에서 빠진 협업 기록도 보존한다',()=>{const w={...emptyWork(),outcome:outcome()};const restored=readSession(JSON.stringify({version:5,brief,selected:[],compared:[],work:{C0001:w}}));expect(restored?.work.C0001.outcome.views).toBe(10000);expect(restored?.brief.campaign?.name).toBe('테스트 캠페인');expect(readWork({C0001:{...w,outcome:{...w.outcome,cost:-1}}})).toEqual({});});
+});
