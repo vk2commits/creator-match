@@ -8,18 +8,18 @@
 | R02 | 필수 p.3 §3.1 | 카테고리 다중 선택 | policy.ts, domain.ts | OR 동작 테스트, 뷰티·패션 21명: 로컬 충족 |
 | R03 | 필수 p.3 §3.1 | 나노·마이크로·매크로 | policy.ts, Onboarding.tsx; PRD §4 | 이름과 구간 표시, 4개 경계값 테스트: 로컬 충족 |
 | R04 | 필수 p.3 §3.2 | 조건에 맞는 후보 목록 | CandidateResults.tsx, CreatorRow.tsx | 조건 위반 0/150조건, 목록 확인: 로컬 충족 |
-| R05 | 평가 p.3 §3.2 | 참여·조회·집행·평점 활용 | domain.ts, weights.ts; PRD §5–6 | 실제 수식·비중·대안·민감도: 로컬 충족 |
+| R05 | 평가 p.3 §3.2 | 참여·조회·집행·평점 활용 | domain.ts, weights.ts; PRD §6 | 실제 수식·비중·대안·민감도: 로컬 충족 |
 | R06 | 평가 p.3 §2.2 | 공란 안전 처리 | domain.ts, matchStory.ts | 원본 27명 미평가·무료 취급 없음: 로컬 충족 |
-| R07 | 평가 p.3 §3.2 | 후보가 없을 때 대안 | domain.ts, CandidateResults.tsx; PRD §7 | 1원→540,000원 적용 후 1명, 실제 수 검사: 로컬 충족 |
+| R07 | 평가 p.3 §3.2 | 후보가 없을 때 대안 | domain.ts, CandidateResults.tsx; PRD §4 S04 | 1원→540,000원 적용 후 1명, 실제 수 검사: 로컬 충족 |
 | R08 | 제약 p.2 §2.2 | 원본 CSV 유지 | public/data/dummy_creators.csv | 외부 원본·앱 복사본 SHA-256 동일: 충족 |
 | R09 | 선택 p.3 §4.1 | 추천 근거 설명 | App.tsx Profile, matchStory.ts | 선택 기준의 문장·비중·비교 집단: 구현·확인 |
 | R10 | 선택 p.4 §4.2 | 결과 재정렬 | sortMatches, SORT_OPTIONS | 추천·참여·조회·집행·평점·동점 검사: 구현·확인 |
 | R11 | 문서 p.4 §5.2 | README.md | 루트 README | 실행·설계·트레이드오프·한계 작성 |
 | R12 | 문서 p.4 §5.2 | PRD.md | 루트 PRD | 문제·기능·수식·가중치·제외 이유 작성 |
-| R13 | 문서 p.4 §5.2 | flowchart.md | 루트 flowchart | 입력·결측·빈 결과·재시도 포함, Mermaid 3개 문법 검사 통과 |
+| R13 | 문서 p.4 §5.2 | flowchart.md | 루트 flowchart | 입력·결측·빈 결과·재시도 포함, Mermaid 7개 문법 검사 통과 |
 | R14 | 문서 p.1 §1.1 | AI_USAGE.md | 루트 AI_USAGE | 실제 요청·도구·컨텍스트·판단 주체·수정 사례 작성 |
 | R15 | 제약 p.1 §1.1 | 작업 이력, squash 금지 | Git 커밋 | 단계별 실제 이력 보존. 공개 후 원격 이력도 확인 필요 |
-| R16 | 제출 p.4 §5.1 | GitHub Public Repository | 아직 원격 없음 | 사용자 최종 검토 후 등록·비로그인 접근 확인 필요 |
+| R16 | 제출 p.4 §5.1 | GitHub Public Repository | 아직 원격 없음 | 업로드 요청 확인. GitHub 로그인 대기, 원격 등록·비로그인 접근 확인 필요 |
 | R17 | 제출 p.1 §1.1·메일 | 72시간 내 링크 회신 | 저장소 밖의 이메일 초안 | 미발송. 제목·마감·링크는 비공개 제출 체크리스트에서 확인 |
 
 ## 추가 제품 선택
