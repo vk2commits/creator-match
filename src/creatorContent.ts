@@ -25,11 +25,17 @@ export const normalizeKeyword=(text:string)=>text.normalize('NFKC').trim().repla
 export const cleanKeywords=(values:string[])=>[...new Set(values.map(normalizeKeyword).filter(Boolean))].slice(0,20);
 export function searchableText(c:Creator,library=getContentLibrary()){const d=contentFor(c.id,library);return [c.name,c.platform,c.category,d?.bio,...(d?.keywords??[]),...(d?.posts.flatMap(p=>[p.title,p.caption,p.brand??'',...p.visualTags])??[])].join(' ').normalize('NFKC').toLocaleLowerCase();}
 export function keywordMatches(c:Creator,include:string[],exclude:string[],library=getContentLibrary()){const text=searchableText(c,library);return (!include.length||include.some(k=>text.includes(normalizeKeyword(k))))&&!exclude.some(k=>text.includes(normalizeKeyword(k)));}
-export function matchEvidence(c:Creator,keywords:string[],library=getContentLibrary()){const d=contentFor(c.id,library);return cleanKeywords(keywords).flatMap(k=>{
- if(d?.posts.some(p=>(p.title+' '+p.caption+' '+p.visualTags.join(' ')).toLocaleLowerCase().includes(k)))return [{keyword:k,source:'콘텐츠'}];
- if(((d?.bio??'')+' '+(d?.keywords??[]).join(' ')).toLocaleLowerCase().includes(k))return [{keyword:k,source:'소개'}];
- if(searchableText(c,library).includes(k))return [{keyword:k,source:'채널 정보'}];return [];
- });}
+export type KeywordEvidence={keyword:string;source:'콘텐츠'|'소개'|'채널 정보';excerpt:string;postId?:string};
+export function matchEvidence(c:Creator,keywords:string[],library=getContentLibrary()):KeywordEvidence[]{
+ const d=contentFor(c.id,library);
+ return cleanKeywords(keywords).flatMap((keyword):KeywordEvidence[]=>{
+  const post=d?.posts.find(p=>normalizeKeyword([p.title,p.caption,p.brand??'',...p.visualTags].join(' ')).includes(keyword));
+  if(post)return [{keyword,source:'콘텐츠',excerpt:post.title,postId:post.id}];
+  if(d&&normalizeKeyword([d.bio,d.style,...d.keywords].join(' ')).includes(keyword))return [{keyword,source:'소개',excerpt:d.bio||d.style}];
+  const field=[c.name,c.platform,c.category].find(value=>normalizeKeyword(value).includes(keyword));
+  return field?[{keyword,source:'채널 정보',excerpt:field}]:[];
+ });
+}
 export function contentStats(posts:CreatorPost[]){
  const avg=(items:CreatorPost[])=>{const known=items.filter(p=>p.views!==null);return known.length?Math.round(known.reduce((s,p)=>s+p.views!,0)/known.length):null;};
  const ads=posts.filter(p=>p.kind==='ad'),organic=posts.filter(p=>p.kind==='organic'),comments=ads.flatMap(p=>p.comments).filter(c=>c.sentiment!=='unreviewed');

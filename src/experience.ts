@@ -31,6 +31,7 @@ export function readSession(raw: string | null): SavedSession | null {
     const campaign=data.brief.campaign;
     if(campaign&&(typeof campaign.name!=='string'||typeof campaign.product!=='string'||!['awareness','engagement','sales'].includes(campaign.goal)))delete data.brief.campaign;
     if(data.brief.campaign){
+      data.brief.campaign.keywordMode=campaign.keywordMode==='all'?'all':'any';
       for(const key of ['includeKeywords','excludeKeywords'])data.brief.campaign[key]=Array.isArray(campaign[key])?[...new Set(campaign[key].filter((v:unknown)=>typeof v==='string').map((v:string)=>v.slice(0,120)))].slice(0,20):[];
       for(const key of ['creatorStyle','requiredElements','searchText','searchPlatform'])data.brief.campaign[key]=typeof campaign[key]==='string'?campaign[key].slice(0,1500):'';
       data.brief.campaign.targetCustomer=typeof campaign.targetCustomer==='string'?campaign.targetCustomer.slice(0,300):'';

@@ -12,7 +12,8 @@ export function searchDraft(text:string,campaign:Campaign):Campaign{
  const excluded=[...excludedTerms,...[...text.matchAll(/([\p{L}\p{N}#]+)(?:은|는|을|를)?\s*(?:제외|빼고)/gu)].map(m=>m[1].replace(/(?:은|는|을|를)$/,'')).filter(k=>!['스타일','콘텐츠','분위기','크리에이터','건','것'].includes(k))];
  const quoted=[...text.matchAll(/["“‘']([^"”’']+)["”’']/g)].map(m=>m[1]);
  const found=vocabulary.filter(k=>text.toLowerCase().includes(k)&&!excluded.some(x=>x.includes(k)));
- const include=cleanKeywords([...found,...quoted]);
+ const include=cleanKeywords([...found,...quoted]).filter(k=>!cleanKeywords(excluded).includes(k));
  const platform=/인스타|instagram/i.test(text)?'인스타그램':/유튜브|youtube/i.test(text)?'유튜브':campaign.searchPlatform??'';
- return {...campaign,searchText:text,searchPlatform:platform,includeKeywords:include.length?include:cleanKeywords(text.split(/[,\n]/).map(x=>x.replace(/(?:크리에이터|인플루언서)(?:를|가|는)?\s*(?:찾아줘|찾고 싶어요|찾아요)?[.!?]?/g,'').trim()).filter(Boolean)),excludeKeywords:cleanKeywords(excluded)};
+ const fallback=text.split(/[,\n.!?]/).filter(x=>!/(?:제외|빼고)/.test(x)).map(x=>x.replace(/(?:인스타그램|인스타|유튜브|instagram|youtube)/gi,'').replace(/(?:크리에이터|인플루언서)(?:를|가|는)?\s*(?:찾아줘|찾고 싶어요|찾아요)?/g,'').trim()).filter(Boolean);
+ return {...campaign,searchText:text,searchPlatform:platform,includeKeywords:include.length?include:cleanKeywords(fallback),excludeKeywords:cleanKeywords(excluded)};
 }

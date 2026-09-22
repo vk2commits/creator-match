@@ -9,7 +9,7 @@ export const GOALS = [
 ] as const;
 export type Goal = typeof GOALS[number]['id'];
 export type CustomerNeed = 'proof' | 'routine' | 'discovery';
-export type Campaign = { name: string; product: string; goal: Goal; targetCustomer?: string; customerNeed?: CustomerNeed; includeKeywords?: string[]; excludeKeywords?: string[]; creatorStyle?: string; requiredElements?: string; searchText?: string; searchPlatform?: string };
+export type Campaign = { name: string; product: string; goal: Goal; targetCustomer?: string; customerNeed?: CustomerNeed; includeKeywords?: string[]; excludeKeywords?: string[]; keywordMode?:'any'|'all'; creatorStyle?: string; requiredElements?: string; searchText?: string; searchPlatform?: string };
 export const EMPTY_CAMPAIGN:Campaign={name:'',product:'',goal:'awareness'};
 export const campaignOf=(brief:Brief):Campaign=>brief.campaign??{name:'나의 캠페인',product:'',goal:'awareness'};
 export const STAGES=[{id:'draft',label:'문의 준비',next:'문의 문안 작성'},{id:'contacted',label:'답변 대기',next:'답변·견적 기록'},{id:'negotiating',label:'조건 협의',next:'견적·조건 검토'},{id:'active',label:'제작 진행',next:'제작 진행 관리'},{id:'complete',label:'집행 완료',next:'성과 업데이트'},{id:'declined',label:'진행 안 함',next:'사유·재검토'}] as const;
