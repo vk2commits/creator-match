@@ -1,0 +1,14 @@
+import type {Creator} from './domain';
+import type {Brief} from './experience';
+import {candidateStatus} from './experience';
+import {hasKnownBudget} from './domain';
+import {moneyText,numberText} from './policy';
+import {contentFor,matchEvidence} from './creatorContent';
+import {Icon,Identity} from './ui';
+export function CreatorRow({creator:c,brief,saved,compared,inSaved,hasWork,onSave,onCompare,onAnalysis,onDetails,onInquiry,onContent}:{creator:Creator;brief:Brief;saved:boolean;compared:boolean;inSaved:boolean;hasWork:boolean;onSave:()=>void;onCompare:()=>void;onAnalysis:()=>void;onDetails:()=>void;onInquiry:()=>void;onContent:(postId?:string)=>void}){
+ const d=contentFor(c.id),hits=matchEvidence(c,brief.campaign?.includeKeywords??[]);
+ return <article className={'creator-result-row '+(saved?'saved':'')} aria-label={c.name+' 후보'}><div className="row-person"><button className="identity-open" onClick={onDetails} aria-label={c.name+' 상세 보기'}><Identity creator={c}/></button><p>{d?.bio??`${c.category} 콘텐츠 · ${c.platform}`}</p><div className="row-keywords">{hits.length?hits.slice(0,2).map(h=><span key={h.keyword} title={h.source+'에서 찾은 키워드'}>{h.keyword}</span>):d?.keywords.slice(0,2).map(k=><span key={k}>{k}</span>)}{inSaved&&candidateStatus(c,brief)!=='조건 충족'&&<small>{candidateStatus(c,brief)}</small>}</div></div>
+ <div className="row-content-preview">{d?.posts.slice(0,2).map(p=><button key={p.id} onClick={()=>onContent(p.id)} aria-label={c.name+' '+p.title+' 콘텐츠 보기'} title={p.title}>{p.image?<img src={p.image} loading="lazy" alt={p.title+' · 생성 이미지'}/>:<span className="post-type-art"><Icon name={c.platform==='유튜브'?'youtube':'instagram'} size={20}/><small>{p.title}</small></span>}<span className="preview-kind">{p.kind==='ad'?'광고':p.format}</span></button>)}{!d&&<button className="no-content-preview" onClick={()=>onContent()}>콘텐츠 자료<br/>추가하기 +</button>}</div>
+ <div className="row-metric"><strong>{numberText(c.views)}</strong><small>평균 조회수</small></div><div className="row-metric"><strong>{c.engagement}%</strong><small>참여율</small></div><div className="row-metric"><strong>{c.campaigns}건 <i>· {c.rating===null?'미평가':c.rating.toFixed(1)+'점'}</i></strong><small>협업 · 광고주 평점</small></div><div className="row-metric row-budget"><strong>{hasKnownBudget(c)?moneyText(c.averageBudget):'견적 문의'}</strong><small>참고 협업비</small></div>
+ <div className="row-actions"><div><button className="row-analysis" onClick={onAnalysis}>✦ 적합 분석</button><button className={'row-save '+((inSaved?compared:saved)?'chosen':'')} aria-pressed={inSaved?compared:saved} aria-label={c.name+(inSaved?(compared?' 비교 해제':' 비교 선택'):(saved?' 저장 취소':' 후보 저장'))} title={inSaved?'비교 선택':'후보 저장'} onClick={inSaved?onCompare:onSave}><Icon name={inSaved?'balance':saved?'check':'bookmark'} size={17}/></button></div><button className="text-button" onClick={onInquiry}>{hasWork?'협업 기록':'문의하기'} <span aria-hidden="true">↗</span></button></div></article>;
+}

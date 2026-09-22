@@ -1,3 +1,4 @@
+import {contentFor} from './creatorContent';
 import {useEffect,useRef} from 'react';
 import type {ReactNode} from 'react';
 import type {Creator} from './domain';
@@ -22,7 +23,7 @@ export function Icon({name,size=20}:{name:string;size?:number}) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{paths[name]??paths.search}</svg>;
 }
 function PlatformBadge({platform}:{platform:Creator['platform']}) {return <span className={'platform-badge '+(platform==='유튜브'?'yt':'ig')} title={platform}><Icon name={platform==='유튜브'?'youtube':'instagram'} size={16}/><span className="sr-only">{platform}</span></span>;}
-export function Identity({creator:c}:{creator:Creator}) {return <div className="creator-identity"><span className={'monogram tone-'+(Number(c.id.replace(/\D/g,''))%4)} aria-hidden="true">{c.name.slice(0,1)}</span><div><div className="creator-name"><strong>{c.name}</strong><PlatformBadge platform={c.platform}/></div><div className="creator-tags"><span className="category-tag">{c.category}</span><span>팔로워 {numberText(c.followers)}명</span></div></div></div>;}
+export function Identity({creator:c}:{creator:Creator}) {return <div className="creator-identity">{contentFor(c.id)?.avatar?<img className="creator-avatar" src={contentFor(c.id)!.avatar} alt="AI 생성 프로필 이미지"/>:<span className={'monogram tone-'+(Number(c.id.replace(/\D/g,''))%4)} aria-hidden="true">{c.name.slice(0,1)}</span>}<div><div className="creator-name"><strong>{c.name}</strong><PlatformBadge platform={c.platform}/></div><div className="creator-tags"><span className="category-tag">{c.category}</span><span>팔로워 {numberText(c.followers)}명</span></div></div></div>;}
 export function Modal({title,children,onClose,wide=false}:{title:string;children:ReactNode;onClose:()=>void;wide?:boolean}) {
   const ref=useRef<HTMLDialogElement>(null);
   useEffect(()=>{ref.current?.showModal();return()=>ref.current?.close();},[]);

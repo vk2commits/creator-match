@@ -31,8 +31,8 @@ function OutcomeFields({value,onChange,issues}:{value:Outcome;onChange:(value:Ou
   </section>;
 }
 
-export function CollaborationEditor({creator:c,record,brief,reason,onSave,onClose,onReport,initialResults=false,initialSent=false}:{creator:Creator;record:WorkRecord;brief:Brief;reason:string;onSave:(record:WorkRecord)=>void;onClose:()=>void;onReport:()=>void;initialResults?:boolean;initialSent?:boolean}){
-  const [draft,setDraft]=useState(record),[result,setResult]=useState(!initialSent&&(initialResults||record.stage==='complete')),[history,setHistory]=useState(initialSent),[composing,setComposing]=useState(false),[errors,setErrors]=useState<string[]>([]),[status,setStatus]=useState(''),[showAI,setShowAI]=useState(false),[sending,setSending]=useState(false),[leaving,setLeaving]=useState(false);
+export function CollaborationEditor({creator:c,record,brief,reason,onSave,onClose,onReport,initialResults=false,initialSent=false,initialCompose=false}:{creator:Creator;record:WorkRecord;brief:Brief;reason:string;onSave:(record:WorkRecord)=>void;onClose:()=>void;onReport:()=>void;initialResults?:boolean;initialSent?:boolean;initialCompose?:boolean}){
+  const [draft,setDraft]=useState(record),[result,setResult]=useState(!initialCompose&&!initialSent&&(initialResults||record.stage==='complete')),[history,setHistory]=useState(initialSent),[composing,setComposing]=useState(initialCompose),[errors,setErrors]=useState<string[]>([]),[status,setStatus]=useState(''),[showAI,setShowAI]=useState(false),[sending,setSending]=useState(false),[leaving,setLeaving]=useState(false);
   const leaveRef=useRef<HTMLDivElement>(null);
   useEffect(()=>{if(leaving)leaveRef.current?.focus();},[leaving]);
   const timer=useRef<ReturnType<typeof setTimeout>|null>(null);

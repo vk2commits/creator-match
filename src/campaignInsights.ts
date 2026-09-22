@@ -27,7 +27,7 @@ export function campaignInsights(c:Creator,all:Creator[],brief:Brief){
   };
   const goal=GOALS.find(g=>g.id===campaign.goal)!.label;
   const fit=campaignFit(c,all,brief),lead=fit.headline,summary=fit.paragraph;
-  const budget={title:!known?'먼저 견적을 받아야 해요':headroom!<0?'현재 예산보다 '+moneyText(-headroom!)+' 높아요':headroom===0?'과거 평균 비용과 예산이 같아요':moneyText(headroom!)+'의 조율 여지가 있어요',body:!known?'기록된 협업 비용이 없어 예산 안에서 가능한지 아직 판단할 수 없어요. 콘텐츠 형식과 수량을 정해 문의해 보세요.':`과거 평균 협업비 ${moneyText(c.averageBudget)}을 1명당 예산 ${moneyText(brief.input.budgetKRW)}과 비교했어요. ${headroom!>0?'추가 촬영이나 사용권 비용을 포함할 수 있는지 확인해 보세요.':'제작 범위·부가세·사용권을 포함한 최종 견적을 먼저 확인해 보세요.'}`};
+  const budget={title:!known?'먼저 견적을 받아야 해요':headroom!<0?'현재 예산보다 '+moneyText(-headroom!)+' 높아요':headroom===0?'과거 평균 비용과 예산이 같아요':'참고 협업비는 예산보다 '+moneyText(headroom!)+' 낮아요',body:!known?'기록된 협업 비용이 없어 예산 안에서 가능한지 아직 판단할 수 없어요. 콘텐츠 형식과 수량을 정해 문의해 보세요.':`과거 평균 협업비 ${moneyText(c.averageBudget)}을 1명당 예산 ${moneyText(brief.input.budgetKRW)}과 비교했어요. ${headroom!>0?'추가 촬영이나 사용권 비용을 포함할 수 있는지 확인해 보세요.':'제작 범위·부가세·사용권을 포함한 최종 견적을 먼저 확인해 보세요.'}`};
   let creative=campaign.customerNeed==='proof'?{
     title:'궁금한 점에 답하는 비교 콘텐츠',hook:target?`‘${target}’인 고객이 제품을 고를 때 망설이는 지점 한 가지로 시작해 보세요.`:'제품 선택을 망설이게 하는 질문 한 가지로 시작해 보세요.',scene:`「${product}」에서 전달하려는 장점을 직접 보여주고, 사용 조건·차이점을 같은 화면에서 비교하는 구성을 제안해요.`
   }:campaign.customerNeed==='discovery'?{
