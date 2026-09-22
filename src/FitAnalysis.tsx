@@ -1,22 +1,25 @@
-import {useState} from 'react';
-import {GOALS} from './campaign';
-import type {Campaign} from './campaign';
+import {useEffect,useMemo,useState} from 'react';
 import type {Creator} from './domain';
-import {campaignFit} from './channelAnalysis';
-import {CustomerFields} from './CustomerFields';
+import type {Brief} from './experience';
+import {campaignInsights} from './campaignInsights';
+import {Identity,Modal,Icon} from './ui';
 
-export function CampaignFitSummary({creator,campaign}:{creator:Creator;campaign:Campaign}){
-  const fit=campaignFit(creator,campaign);
-  return <section className="campaign-fit-summary"><div><span>✦ 캠페인 적합 분석</span><small>AI 시연</small></div><h3>{fit.headline}</h3><p>{fit.summary}</p>{fit.customer&&<p className="fit-customer-summary">{fit.customer.aligned?'고객의 선택 기준과도 맞는 방향이에요.':`고객의 선택 기준인 ‘${({proof:'꼼꼼한 비교',routine:'일상에서의 쓰임',discovery:'새로운 발견'} as const)[fit.customer.need.id]}’에 맞춰 제작 방향을 조율해 보세요.`}</p>}</section>;
-}
-export function FitAnalysis({creator,campaign,onCampaign}:{creator:Creator;campaign:Campaign;onCampaign:(c:Campaign)=>void}){
-  const [editing,setEditing]=useState(false),[draft,setDraft]=useState(campaign);
-  const fit=campaignFit(creator,campaign);
-  return <section className="fit-analysis"><div className="section-heading"><div><span className="section-kicker">✦ {GOALS.find(g=>g.id===campaign.goal)?.label}</span><h3>{fit.headline}</h3></div><span className="ai-state">AI 시연</span></div><p className="fit-lead">{fit.summary}</p>
-    <div className="analysis-logic"><div><span>캠페인</span><p>{campaign.product||campaign.name}</p></div><div><span>콘텐츠 방식</span><p>{fit.evidence}</p></div>{fit.customer&&<div><span>타깃 고객</span><div><strong>{fit.customer.target}</strong><p>{fit.customer.aligned?fit.customer.reasoning:fit.customer.need.detail}</p></div></div>}</div>
-    {fit.tradeoff&&<div className="analysis-tradeoff"><strong>제작 방향을 맞출 부분</strong><p>{fit.tradeoff}</p></div>}
-    <div className="analysis-recommendation"><span>이렇게 협업을 제안해 보세요</span><p>{fit.request}</p></div>
-    {editing?<div className="analysis-customer-edit"><CustomerFields value={draft} onChange={setDraft}/><div className="form-actions"><button className="text-button" onClick={()=>setEditing(false)}>취소</button><button className="secondary-button" onClick={()=>{onCampaign(draft);setEditing(false);}}>고객 정보 적용</button></div></div>:<button className="text-button" onClick={()=>{setDraft(campaign);setEditing(true);}}>{campaign.customerNeed?'타깃 고객 수정':'타깃 고객 추가'}</button>}
-    <p className="analysis-boundary">예시 콘텐츠를 활용한 분석입니다. 실제 추천 순서는 아래의 제공 지표로 정했습니다.</p>
-  </section>;
+export function FitAnalysis({creator,all,brief,onClose,onInquiry,onCompare,hasWork}:{creator:Creator;all:Creator[];brief:Brief;onClose:()=>void;onInquiry:(proposal:string)=>void;onCompare:(c:Creator)=>void;hasWork:boolean}){
+  const [step,setStep]=useState(0);
+  const analysis=useMemo(()=>campaignInsights(creator,all,brief),[creator,all,brief]);
+  useEffect(()=>{setStep(0);const a=setTimeout(()=>setStep(1),650),b=setTimeout(()=>setStep(2),1300),c=setTimeout(()=>setStep(3),2100);return()=>{clearTimeout(a);clearTimeout(b);clearTimeout(c);};},[creator,brief]);
+  return <Modal title="✦ 캠페인 적합 분석" onClose={onClose} wide><div className="insight-modal">
+    <div className="insight-context"><Identity creator={creator}/><span>{analysis.campaign.name}<small>{analysis.goal}</small></span></div>
+    {step<3?<section className="insight-loading" role="status" aria-live="polite" aria-busy="true"><span className="insight-orb">✦</span><h3>{['캠페인과 채널 지표를 살펴보고 있어요','이 후보의 강점과 조율할 점을 정리하고 있어요','협업 아이디어와 확인할 성과를 준비하고 있어요'][step]}</h3><p>제품 · 타깃 고객 · 예산 · 추천 기준</p><div className="insight-loading-steps">{['캠페인 파악','지표 비교','협업 제안'].map((label,i)=><span key={label} className={step>=i?'active':''}>{step>i?'✓':i+1} {label}</span>)}</div></section>:<>
+      <section className="insight-verdict"><span className="section-kicker">이 후보를 어떻게 검토하면 좋을까요?</span><h3>{analysis.lead}</h3><p>{analysis.summary}</p></section>
+      <section className="insight-section"><h3><span>01</span> 먼저 볼 강점</h3><div className="insight-evidence">{analysis.evidence.map(e=><article key={e.key}><span>{e.title}</span><strong>{e.value}</strong><p>{e.body}</p></article>)}</div></section>
+      <section className="insight-budget"><Icon name="balance" size={22}/><div><h3>{analysis.budget.title}</h3><p>{analysis.budget.body}</p></div></section>
+      <section className="insight-section insight-creative"><h3><span>02</span> 우리 제품, 이렇게 소개해 보세요</h3><h4>{analysis.creative.title}</h4><ol><li><span>시작 장면</span><p>{analysis.creative.hook}</p></li><li><span>제품 소개</span><p>{analysis.creative.scene}</p></li><li><span>다음 행동</span><p>{analysis.cta}</p></li></ol><p className="insight-format">{analysis.format}</p></section>
+      <section className="insight-section"><h3><span>03</span> 협업 전에 맞춰볼 점</h3><div className="insight-risks">{analysis.risks.map(r=><article key={r.title}><h4>{r.title}</h4><p>{r.body}</p></article>)}</div></section>
+      {analysis.comparison&&<section className="insight-alternative"><div><span className="section-kicker">같은 분야·플랫폼에서 비교</span><h3>비용을 더 줄이고 싶다면</h3><p>{analysis.comparison.text}</p></div><button className="secondary-button" onClick={()=>onCompare(analysis.comparison!.creator)}>{analysis.comparison.creator.name} 분석<Icon name="arrow" size={15}/></button></section>}
+      <section className="insight-section"><h3><span>04</span> 집행 후, 무엇을 확인할까요?</h3><ol className="insight-measurement">{analysis.measurement.map(m=><li key={m}>{m}</li>)}</ol></section>
+      <details className="plain-method"><summary>분석에 사용한 정보</summary><p>{analysis.source}</p></details>
+      <div className="insight-footer"><div><strong>{hasWork?'문의와 협업을 이어가세요':'이 방향으로 협업을 제안해 보세요'}</strong><small>{hasWork?'작성한 문안과 기록은 그대로 유지됩니다.':'콘텐츠 제안을 문의 초안에 넣어드립니다.'}</small></div><button className="primary-button" onClick={()=>onInquiry(analysis.proposal)}>{hasWork?'협업 기록 열기':'제안 담아 문의하기'}<Icon name="arrow" size={16}/></button></div>
+    </>}
+  </div></Modal>;
 }

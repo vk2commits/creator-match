@@ -28,3 +28,6 @@ export function Modal({title,children,onClose,wide=false}:{title:string;children
   useEffect(()=>{ref.current?.showModal();return()=>ref.current?.close();},[]);
   return <dialog ref={ref} className={'modal '+(wide?'wide':'')} onCancel={e=>{e.preventDefault();onClose();}} onClick={e=>{if(e.target===ref.current)onClose();}} aria-labelledby="modal-title"><div className="modal-header"><h2 id="modal-title">{title}</h2><button className="icon-button" aria-label="닫기" onClick={onClose}><Icon name="close"/></button></div>{children}</dialog>;
 }
+
+export function RequiredMark(){return <span className="required-mark" aria-hidden="true"> *</span>;}
+export function RequiredHint(){return <p className="required-hint"><RequiredMark/> 필수 입력</p>;}

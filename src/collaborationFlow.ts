@@ -3,7 +3,7 @@ import {hasOutcome,workErrors} from './campaign';
 import type {Stage,WorkRecord} from './campaign';
 
 export const STAGE_GUIDES:Record<Stage,{title:string;description:string;action:string;next?:Stage}>={
-  draft:{title:'이 크리에이터에게 협업을 제안하세요',description:'문안을 확인하고 문의 보내기를 체험하세요. 실제 연락은 복사한 문안으로 메일이나 DM에서 보낼 수 있어요.',action:'문의 보내기 · 시연',next:'contacted'},
+  draft:{title:'이 크리에이터에게 협업을 제안하세요',description:'제품과 제작 조건을 확인한 뒤 문의를 보내세요.',action:'문의 보내기',next:'contacted'},
   contacted:{title:'답변을 기다리고 있어요',description:'견적이나 진행 가능 일정이 도착하면 답변과 조건을 기록하세요.',action:'답변 받았어요',next:'negotiating'},
   negotiating:{title:'받은 견적과 제작 조건을 맞춰보세요',description:'받은 견적과 최종 합의 비용을 구분해 기록합니다. 확인 중인 조건은 나중에 채워도 돼요.',action:'협업 확정하기',next:'active'},
   active:{title:'제작 일정과 확정된 조건을 확인하세요',description:'게시를 마치면 콘텐츠 링크를 남기고, 확인한 성과를 이어서 기록하세요.',action:'게시 완료로 변경',next:'complete'},

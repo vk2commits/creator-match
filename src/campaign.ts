@@ -22,30 +22,47 @@ export type WorkRecord={stage:Stage;email:string;channelUrl:string;deliverable:s
 export type WorkRecords=Record<string,WorkRecord>;
 export const emptyOutcome=():Outcome=>({cost:null,measuredAt:'',source:'',contentUrl:'',attribution:'',views:null,likes:null,comments:null,shares:null,saves:null,clicks:null,conversions:null,revenue:null});
 export const emptyWork=():WorkRecord=>({stage:'draft',email:'',channelUrl:'',deliverable:'',dueDate:'',rights:'',agreedCost:null,quotedCost:null,contactedAt:'',demoSentAt:'',sentMessage:'',sentHistory:[],closedReason:'',memo:'',message:'',outcome:emptyOutcome()});
-export function safeUrl(value:string):boolean {try{const u=new URL(value);return ['https:','http:'].includes(u.protocol)&&!u.username&&!u.password;}catch{return false;}}
+/** Accept pasted public web addresses, never executable schemes or credentials. */
+export function normalizeWebUrl(value:string):string|null {
+  const raw=value.trim();
+  if(!raw)return '';
+  if(/[\s\\]/.test(raw)||raw.startsWith('/'))return null;
+  const explicit=/^[a-z][a-z\d+.-]*:/i.test(raw);
+  if(explicit&&!/^https?:\/\//i.test(raw))return null;
+  try {
+    const u=new URL(explicit?raw:'https://'+raw);
+    if(!['http:','https:'].includes(u.protocol)||u.username||u.password||!u.hostname.includes('.')||u.hostname.startsWith('.')||u.hostname.endsWith('.'))return null;
+    return u.href;
+  }catch{return null;}
+}
+export function safeUrl(value:string):boolean {return !!value.trim()&&normalizeWebUrl(value)!==null;}
+export function normalizeWorkUrls(w:WorkRecord):WorkRecord {return {...w,channelUrl:normalizeWebUrl(w.channelUrl)??w.channelUrl,outcome:{...w.outcome,contentUrl:normalizeWebUrl(w.outcome.contentUrl)??w.outcome.contentUrl}};}
+export type FieldIssues=Record<string,string>;
 export const validNumber=(value:unknown):value is number=>typeof value==='number'&&Number.isSafeInteger(value)&&value>=0;
 export function parseMetric(value:string):number|null {if(!value.trim())return null;const n=Number(value.replaceAll(',',''));return validNumber(n)&&/^[\d,]+$/.test(value)?n:NaN;}
 export function validDate(value:string):boolean {return /^\d{4}-\d{2}-\d{2}$/.test(value)&&!isNaN(Date.parse(value))&&new Date(value+'T00:00:00Z').toISOString().slice(0,10)===value;}
-export function outcomeErrors(outcome:Outcome):string[] {
-  const errors:string[]=[];
-  if([outcome.cost,...METRICS.map(m=>outcome[m.key])].some(n=>n!==null&&!validNumber(n)))errors.push('지표와 비용은 0 이상의 정수로 입력해 주세요.');
-  const any=[outcome.cost,...METRICS.map(m=>outcome[m.key])].some(n=>n!==null);
-  if(any&&!validDate(outcome.measuredAt))errors.push('성과를 확인한 날짜를 입력해 주세요.');
-  if(any&&!outcome.source.trim())errors.push('지표를 확인한 출처를 입력해 주세요.');
-  if(outcome.contentUrl&&!safeUrl(outcome.contentUrl))errors.push('콘텐츠 링크는 http 또는 https 주소로 입력해 주세요.');
-  if((outcome.revenue!==null||outcome.conversions!==null)&&!outcome.attribution.trim())errors.push('구매·매출의 집계 기준을 입력해 주세요. 예: 전용 할인코드, 7일 집계');
+export function outcomeIssues(o:Outcome):FieldIssues {
+  const errors:FieldIssues={};
+  for(const key of ['cost',...METRICS.map(m=>m.key)] as const)if(o[key]!==null&&!validNumber(o[key]))errors['outcome.'+key]='0 이상의 정수로 입력해 주세요.';
+  if((hasOutcome(o)||o.measuredAt)&&!validDate(o.measuredAt))errors['outcome.measuredAt']='성과를 확인한 날짜를 입력해 주세요.';
+  if(hasOutcome(o)&&!o.source.trim())errors['outcome.source']='지표를 확인한 출처를 입력해 주세요.';
+  if(o.contentUrl&&!safeUrl(o.contentUrl))errors['outcome.contentUrl']='콘텐츠 주소를 확인해 주세요. 예: youtube.com/watch?v=…';
+  if((o.revenue!==null||o.conversions!==null)&&!o.attribution.trim())errors['outcome.attribution']='구매·매출의 집계 기준을 입력해 주세요. 예: 전용 할인코드, 7일 집계';
   return errors;
 }
-export function workErrors(w:WorkRecord):string[]{return [
-  ...(w.email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(w.email)?['이메일 주소를 확인해 주세요.']:[]),
-  ...(w.channelUrl&&!safeUrl(w.channelUrl)?['채널 링크는 http 또는 https 주소로 입력해 주세요.']:[]),
-  ...(w.dueDate&&!validDate(w.dueDate)?['게시 예정일을 확인해 주세요.']:[]),
-  ...(w.contactedAt&&!validDate(w.contactedAt)?['문의한 날짜를 확인해 주세요.']:[]),
-  ...(w.agreedCost!==null&&!validNumber(w.agreedCost)?['합의 비용은 0 이상의 정수로 입력해 주세요.']:[]),
-  ...(w.quotedCost!==null&&!validNumber(w.quotedCost)?['받은 견적은 0 이상의 정수로 입력해 주세요.']:[]),
-  ...(w.demoSentAt&&!Number.isFinite(Date.parse(w.demoSentAt))?['시연 발송 기록을 확인해 주세요.']:[]),
-  ...outcomeErrors(w.outcome),
-];}
+export const outcomeErrors=(o:Outcome)=>Object.values(outcomeIssues(o));
+export function workIssues(w:WorkRecord):FieldIssues {
+  const errors:FieldIssues={};
+  if(w.email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(w.email))errors.email='이메일 주소를 확인해 주세요.';
+  if(w.channelUrl&&!safeUrl(w.channelUrl))errors.channelUrl='채널 주소를 확인해 주세요. 예: instagram.com/계정명';
+  if(w.dueDate&&!validDate(w.dueDate))errors.dueDate='게시 예정일을 확인해 주세요.';
+  if(w.contactedAt&&!validDate(w.contactedAt))errors.contactedAt='문의한 날짜를 확인해 주세요.';
+  if(w.agreedCost!==null&&!validNumber(w.agreedCost))errors.agreedCost='합의 비용은 0 이상의 정수로 입력해 주세요.';
+  if(w.quotedCost!==null&&!validNumber(w.quotedCost))errors.quotedCost='받은 견적은 0 이상의 정수로 입력해 주세요.';
+  if(w.demoSentAt&&!Number.isFinite(Date.parse(w.demoSentAt)))errors.demoSentAt='발송 기록을 확인해 주세요.';
+  return {...errors,...outcomeIssues(w.outcome)};
+}
+export const workErrors=(w:WorkRecord)=>Object.values(workIssues(w));
 export const hasOutcome=(o:Outcome)=>[o.cost,...METRICS.map(m=>o[m.key])].some(n=>n!==null);
 export function efficiencies(o:Outcome){
   const ratio=(denominator:number|null)=>o.cost!==null&&denominator!==null&&denominator>0?o.cost/denominator:null;
@@ -80,7 +97,7 @@ export function readWork(raw:unknown):WorkRecords {
     w.sentHistory=w.sentHistory.filter(s=>s&&typeof s.id==='string'&&['demo','manual'].includes(s.kind)&&typeof s.sentAt==='string'&&typeof s.message==='string'&&(s.kind==='manual'?validDate(s.sentAt):Number.isFinite(Date.parse(s.sentAt)))).map(s=>({...s,message:s.message.slice(0,12000)}));
     if(workErrors(w).length)continue;
     for(const k of strings)w[k]=w[k].slice(0,['message','sentMessage'].includes(k)?12000:2000);
-    result[id]=w;
+    result[id]=normalizeWorkUrls(w);
   }
   return result;
 }

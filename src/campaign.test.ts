@@ -19,3 +19,37 @@ describe('협업에서 관측 결과까지',()=>{
   it('집계는 비용·조회수가 함께 있는 후보끼리만 나눈다',()=>{const report=reportSummary({C0001:{...emptyWork(),outcome:{...outcome(),cost:100,views:10}},C0002:{...emptyWork(),outcome:{...outcome(),cost:900,views:null}},C0003:{...emptyWork(),outcome:{...outcome(),cost:null,views:1000}}});expect(report.cost).toBe(1000);expect(report.views).toBe(1010);expect(report.cpv).toBe(10);expect(report.pairCount).toBe(1);expect(report.viewCount).toBe(2);});
   it('과거 저장을 복구하면서 보관에서 빠진 협업 기록도 보존한다',()=>{const w={...emptyWork(),outcome:outcome()};const restored=readSession(JSON.stringify({version:5,brief,selected:[],compared:[],work:{C0001:w}}));expect(restored?.work.C0001.outcome.views).toBe(10000);expect(restored?.brief.campaign?.name).toBe('테스트 캠페인');expect(readWork({C0001:{...w,outcome:{...w.outcome,cost:-1}}})).toEqual({});});
 });
+
+// Saving accepts pasted channel/content URLs and maps conditional requirements to fields.
+import {normalizeWebUrl,normalizeWorkUrls,workIssues,outcomeIssues} from './campaign';
+describe('붙여넣은 링크와 조건부 필수 입력',()=>{
+ it('프로토콜을 생략한 링크와 유튜브 계정 경로를 정규화한다',()=>{
+  expect(normalizeWebUrl(' youtube.com/watch?v=abc ')).toBe('https://youtube.com/watch?v=abc');
+  expect(normalizeWebUrl('www.instagram.com/name/')).toBe('https://www.instagram.com/name/');
+  expect(normalizeWebUrl('youtube.com/@creator')).toBe('https://youtube.com/@creator');
+  expect(normalizeWebUrl('http://example.com/post')).toBe('http://example.com/post');
+  expect(normalizeWebUrl('')).toBe('');
+ });
+ it('실행 주소·이메일·상대 경로·잘못된 프로토콜은 링크로 저장하지 않는다',()=>{
+  for(const url of ['javascript:alert(1)','data:text/html,hi','/video','//evil.com','creator@example.com','https://user:pass@example.com','https:example.com','not a link','justword','ftp://example.com','https://'])expect(normalizeWebUrl(url),url).toBeNull();
+ });
+ it('링크 보완은 다른 기록을 바꾸지 않고 복구 시에도 절대 주소가 된다',()=>{
+  const w={...emptyWork(),message:'기존 문안',channelUrl:'youtube.com/@creator',outcome:{...emptyOutcome(),contentUrl:'instagram.com/p/example/'}};
+  const result=normalizeWorkUrls(w);expect(workErrors(result)).toEqual([]);expect(w.channelUrl).toBe('youtube.com/@creator');expect(result.message).toBe('기존 문안');expect(readWork({C0001:w}).C0001.outcome.contentUrl).toBe('https://instagram.com/p/example/');
+ });
+ it('0도 측정값이며 확인일·출처를 필수 필드로 지정한다',()=>{
+  expect(outcomeIssues(emptyOutcome())).toEqual({});
+  expect(Object.keys(outcomeIssues({...emptyOutcome(),views:0}))).toEqual(['outcome.measuredAt','outcome.source']);
+ });
+ it('구매 또는 매출을 입력할 때만 집계 기준을 요구한다',()=>{
+  const o={...emptyOutcome(),measuredAt:'2026-09-22',source:'채널 인사이트'};
+  expect(outcomeIssues({...o,conversions:0})).toHaveProperty('outcome.attribution');
+  expect(outcomeIssues({...o,revenue:0})).toHaveProperty('outcome.attribution');
+  expect(outcomeIssues({...o,clicks:0})).toEqual({});
+  expect(outcomeIssues({...o,conversions:0,attribution:'할인코드 7일'})).toEqual({});
+ });
+ it('개별 입력 오류를 해당 필드에 연결한다',()=>{
+  expect(workIssues({...emptyWork(),email:'wrong',channelUrl:'javascript:x',quotedCost:-1})).toHaveProperty('email');
+  expect(outcomeIssues({...emptyOutcome(),views:-1})).toHaveProperty('outcome.views');
+ });
+});
