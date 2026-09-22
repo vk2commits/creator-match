@@ -4,7 +4,7 @@
 
 원본 CSV 200명의 지표를 조건·사용자 비중으로 비교한다. 후보별 적합 분석은 제품·고객·콘텐츠의 연결과 조율할 점을 설명하고, 선택한 질문을 문의 초안으로 전달한다. 기본 실행에는 계정·API 키·DB가 필요하지 않다.
 
-현재는 **통합 분석과 두 단계 온보딩을 구현·검증한 상태**다. 캠페인별 후보·문의·상태의 분리와 복원을 확인했다. 검색에서 콘텐츠 자료 미확인 후보의 처리, 목록 정리, 캠페인별 성과의 추가 검증, 사용자 최종 검토·공개 제출은 남아 있다. [분석 적용](docs/UNIFIED_ANALYSIS.md) · [온보딩 적용](docs/ONBOARDING_REVIEW.md).
+현재는 **통합 분석·두 단계 온보딩·자료 범위를 구분하는 검색을 적용한 상태**다. 캠페인별 후보·문의·상태의 분리와 복원을 확인했다. 캠페인별 성과의 추가 검증, 최신 전체 기능의 새 환경 재현, 사용자 최종 검토·공개 제출은 남아 있다. [분석 적용](docs/UNIFIED_ANALYSIS.md) · [온보딩 적용](docs/ONBOARDING_REVIEW.md) · [검색 적용](docs/SEARCH_EVIDENCE.md).
 
 ## 3분 안에 살펴보기
 
@@ -35,7 +35,7 @@ npm run preview  # 생성 파일 로컬 확인
 npm run analyze  # 데이터 감사·추천 비교 문서 재생성
 ```
 
-최근 전체 자동 검사는 **14개 파일 185개 테스트 통과**다. 데스크톱 검증·타입/빌드·이전 독립 설치 재현 범위는 [QA](docs/QA.md)에 구분해 기록했다. 최신 확장 전체를 새 환경에서 재검증한 것으로 주장하지 않는다.
+최근 전체 자동 검사는 **15개 파일 200개 테스트 통과**다. 데스크톱 검증·타입/빌드·이전 독립 설치 재현 범위는 [QA](docs/QA.md)에 구분해 기록했다. 최신 확장 전체를 새 환경에서 재검증한 것으로 주장하지 않는다.
 
 ## 핵심 판단
 
@@ -62,6 +62,7 @@ npm run analyze  # 데이터 감사·추천 비교 문서 재생성
 | 경쟁사별 18개 적용안·우선순위·Pro 가설 | [벤치마크 적용 계획](docs/BENCHMARK_APPLICATION_PLAN.md) |
 | 분석·근거·문의 연결 | [1단계 적용 결과](docs/UNIFIED_ANALYSIS.md) |
 | 두 단계 온보딩·입력 보존·캠페인 분리 | [2단계 적용 결과](docs/ONBOARDING_REVIEW.md) |
+| 검색의 확인·자료 부족·제외, 콘텐츠 근거와 목록 | [3단계 적용 결과](docs/SEARCH_EVIDENCE.md) |
 | 6개 경쟁사 강점·제약·미확인·출처 | [심층 보고서](docs/COMPETITOR_DEEP_DIVE.md) |
 | 문제·정책·수식·수용 기준 | [PRD](PRD.md) |
 | 입력·추천·예외·문의 흐름 | [flowchart](flowchart.md) |
@@ -85,6 +86,8 @@ src/briefIntake.ts             명시된 조건의 로컬 추출
 src/WorkspaceApp.tsx           캠페인별 작업실
 src/CreatorRow.tsx             간결한 후보 목록
 src/DiscoverySearch.tsx        자연어·키워드·이미지 입력
+src/searchPolicy.ts            검색 근거·자료 부족·제외 판정
+src/CandidateResults.tsx       모집단·검색 인원·빈 상태
 src/review.ts                  화면·문의·리포트의 공통 분석
 src/ContentDossier.tsx         통합 분석과 근거 탭
 src/creatorContent.ts          별도 예시·등록 자료·범위별 집계
