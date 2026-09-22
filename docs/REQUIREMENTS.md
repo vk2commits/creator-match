@@ -1,6 +1,6 @@
 # 요구사항 추적표
 
-2026-09-22 8차 재검토. **로컬 구현·검증과 최종 제출 완료를 구분한다.** 현재는 사용자 검토 단계이며 공개 저장소·메일 제출은 완료되지 않았다. 원문 위치는 안내 PDF의 절 번호다. 원문과 채용 메일은 저장소에 포함하지 않는다.
+2026-09-22 9차 재검토. **로컬 구현·검증과 최종 제출 완료를 구분한다.** 현재는 사용자 검토 단계이며 공개 저장소·메일 제출은 완료되지 않았다. 원문 위치는 안내 PDF의 절 번호다. 원문과 채용 메일은 저장소에 포함하지 않는다.
 
 | ID | 구분 | 요구사항 | 원문 위치 | 구현·문서 위치 | 검증 근거 | 상태 |
 |---|---|---|---|---|---|---|
@@ -12,7 +12,7 @@
 | R06 | 평가 | 평점 결측 안전 처리 | 2.2 | src/domain.ts·src/App.tsx | null·미평가·척도 중간 대체값 테스트 | 로컬 통과 |
 | R07 | 평가 | 후보 없음과 대안 | 2.2·3.2 | src/domain.ts·src/App.tsx·flowchart.md | 최소 예산·대안 인원; 1원→540,000원으로 1명 확인 | 로컬 통과 |
 | R08 | 제약 | 원본 CSV 불변 | 2.2 | public/data/dummy_creators.csv·docs/DATA_AUDIT.md | 200행·SHA-256 일치 | 로컬 통과; 제출 직전 재확인 |
-| R09 | 선택 | 추천 근거 표시 | 4.1 | 카드·상세·비교, src/matchStory.ts; 계산식은 PRD | 구성요소 합계·일반 상세 확인; docs/LOGIC_REVIEW.md 추가 진단 | 로컬 통과; 집단 확대·개별 예산 회귀 검증과 상세 확인 |
+| R09 | 선택 | 추천 근거 표시 | 4.1 | 분석 모달·상세·비교, src/campaignInsights.ts·src/matchStory.ts; 계산식은 PRD | 구성요소 합계·일반 상세 확인; docs/LOGIC_REVIEW.md 추가 진단 | 로컬 통과; 집단 확대·개별 예산 회귀 검증과 상세 확인 |
 | R10 | 선택 | 결과 재정렬 | 4.2 | src/policy.ts·src/domain.ts·src/App.tsx | 추천/참여율/조회/집행/평점·동점·null 정렬 | 로컬 통과 |
 | R11 | 필수 | README.md | 5.2 | 저장소 루트 | 별도 빈 폴더에서 설치·테스트·분석·빌드; docs/QA.md | 작성·실행 검증; 최종 리뷰 대기 |
 | R12 | 필수 | PRD.md | 5.2 | 저장소 루트 | 수식·가중치·제외 기능·화면 예외 대조 | 작성; 최종 리뷰 대기 |
@@ -67,14 +67,15 @@
 | U13 | 발송 시연·상태별 입력·유연한 변경 | collaborationFlow, campaign, Workflow | 발송→답변→견적→제작→성과, 되돌림·복원 |
 | U14 | 반복 태그·행동 카피 정리 | App, CollaborationEditor, design.css | 데스크톱 화면·자동 카피 검색 |
 
-## 8차 최신 수용 기준
+## 9차 최신 수용 기준
 
 | ID | 요구 | 구현 | 확인 |
 |---|---|---|---|
-| U15 | 캠페인 분석을 앞에 기본 노출 | CampaignFitSummary·FitAnalysis·campaignFit | 카드·상세·목표별 설명·점수 불변 |
+| U15 | 요청형 AI 분석 모달·문의 연결 | FitAnalysis·campaignInsights·App | 로딩·후보별 근거/예산/조율·제안→문의·원본/순위 불변 |
 | U16 | 팀 검토안 제거·선택 인원 그대로 비교 | App Compare | 3열·각각 문의 버튼·누른1명만 열림 |
 | U17 | 보낸 문의가 바로 보이고 다시 찾기 쉬움 | SentInquiries·sentHistory·CollaborationEditor | 발송 직후·메뉴 재진입·3건 보존·새 초안 날짜는 발송 아님 |
-| U18 | 별도 채널 페이지 | ChannelPage | 새 탭·예시 표시·원래 상세 유지 |
+| U18 | 별도 채널 페이지 | ChannelPage | 새 탭·콘텐츠 구성 제안 표시·원래 상세 유지 |
 | U19 | 적용 후 결과·명확한 전환·평점 색상 | PriorityEditor·MatchingTransition·design.css | 취소/적용 순위·4.2초3단계·금색 트랙 |
+| U20 | 조건부 필수 표시·쉬운 링크·저장 피드백 | campaign·CollaborationEditor·Workflow | 0 포함 필수 *, 링크 보완, 오류 초점·펼침, 같은 리포트 재저장 후 닫힘 |
 
 [요소별 판단과 검증](PRODUCT_UX_AUDIT.md), [실행 증거](QA.md). 원문 요구와 선택 기능을 구분하며 사용자 최종 검토·공개 GitHub·제출은 미완료다.
