@@ -48,7 +48,7 @@
 | U03 | 저장→비교→개별 문의 | App Compare/Profile/openInquiry | 8차3명 비교·1명 문의; 팀 검토안 제거 |
 | U04 | 후보별 정보와 공통 확인의 분리 | matchStory, campaignFit | 공통 문장 제거·결측/약점/조율 분기 |
 | U05 | 사용자와 검증의 출처 | docs/PERSONA_TEST.md | 사용자 선택과 AI 점검 기록, 실제 인터뷰 미수행 명시 |
-| U06 | 설명→한 화면 검토의 두 단계 | Onboarding·setup·briefIntake, PRD | 14개 추가 테스트·필수 누락·타깃 미정·비중 유지·재진입 취소 |
+| U06 | 설명 후 캠페인·고객→후보 조건→추천 기준 | Onboarding·setup·briefIntake, PRD | 단계별 필수 누락·입력 보존·직접 비중 유지·빌드 확인 |
 | U07 | 문의 뒤 협업 상태 | Workflow.tsx, campaign.ts | 한 명 대상·발송 시연/실제 날짜 분리·누락 허용/값 검증·상태 전환 |
 | U08 | 실제 성과 기록·상세 | campaign.ts, Workflow.tsx | 결측·0·부분 집계·브라우저 저장·예시 분리 |
 | U09 | 작동하는 AI 시연 | BriefBuilder.tsx, briefDemo.ts, AssistantPanel.tsx, assistantDemo.ts | 조건·문안·성과 결과 적용; 실제 모델과 구분. 개발용 응답 파서 별도 |
