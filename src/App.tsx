@@ -1,24 +1,24 @@
+import {Onboarding} from './Onboarding';
+import {WeightControls} from './WeightControls';
 import {appendInquiryProposal} from './inquiryProposal';
 import {CreatorRow} from './CreatorRow';
 import {ContentDossier} from './ContentDossier';
 import {DiscoverySearch} from './DiscoverySearch';
 import {keywordMatches,contentNarrative,contentFor} from './creatorContent';
 import {sentCount} from './sentHistory';
-import {CustomerFields} from './CustomerFields';
 import {FitAnalysis} from './FitAnalysis';
 import {MatchingTransition,MATCHING_DURATION} from './MatchingTransition';
 import {ChannelPage,channelHref} from './ChannelPage';
-import {BriefBuilder} from './BriefBuilder';
 import {matchStory} from './matchStory';
 import {Workflow} from './Workflow';
-import {campaignOf,EMPTY_CAMPAIGN,GOALS,emptyWork,inquiryDraft} from './campaign';
-import type {Campaign,WorkRecords} from './campaign';
+import {campaignOf,emptyWork,inquiryDraft} from './campaign';
+import type {WorkRecords} from './campaign';
 import {useRecommendation} from './useRecommendation';
 import {Icon,Identity,Modal,RequiredMark,RequiredHint} from './ui';
 import { flushSync } from 'react-dom';
 import { briefSchema, modelContext, parseToolBrief } from './webmcp';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import type { FormEvent,CSSProperties,ReactNode } from 'react';
+import type { FormEvent,ReactNode } from 'react';
 import { CATEGORIES, DEFAULT_INPUT, PRIORITIES, SORT_OPTIONS, TIERS, moneyText, numberText, priorityOf, tierRange } from './policy';
 import type { Category, Priority, SortKey, Tier, Weights } from './policy';
 import { hasKnownBudget, parseBudget, recommend, scoreCreator, sortMatches, validateInput } from './domain';
@@ -26,16 +26,9 @@ import type { Creator, InputErrors, ScoredCreator } from './domain';
 import { loadCreators } from './loadData';
 import { candidateStatus, criteriaOf, formatBudget, toggleCompared } from './experience';
 import type { Brief, Notes, Decision, Decisions, SavedSession } from './experience';
-import { WEIGHT_FIELDS, redistribute } from './weights';
 
 function PriorityChoices({value,onChange}:{value:Priority|null;onChange:(value:Priority)=>void}) {
   return <div className="priority-choices"><div className="priority-grid" role="group" aria-label="추천 우선순위">{PRIORITIES.filter(p=>p.id!=='balanced').map(p=><button key={p.id} className={'priority-card '+(value===p.id?'chosen':'')} aria-pressed={value===p.id} onClick={()=>onChange(p.id)}><span className="priority-symbol"><Icon name={p.icon} size={24}/></span><span className="choice-mark">{value===p.id&&<Icon name="check" size={14}/>}</span><strong>{p.title}</strong><p>{p.description}</p></button>)}</div><button className="balanced-choice" aria-pressed={value==='balanced'} onClick={()=>onChange('balanced')}><Icon name={value==='balanced'?'check':'balance'} size={16}/><span>아직 정하지 않았어요 <small>네 지표를 같은 비중으로 비교</small></span></button></div>;
-}
-function WeightControls({weights,onChange}:{weights:Weights;onChange:(weights:Weights)=>void}) {
-  const anchor=useRef<{key:keyof Weights;weights:Weights}|null>(null);
-  const begin=(key:keyof Weights)=>{anchor.current={key,weights};};
-  const change=(key:keyof Weights,value:number)=>onChange(redistribute(anchor.current?.key===key?anchor.current.weights:weights,key,value));
-  return <fieldset className="weight-controls"><legend>지표별 비중 <span>합계 100%</span></legend><p id="weight-help">하나를 바꾸면 나머지는 기존 비율에 맞춰 조정됩니다.</p>{WEIGHT_FIELDS.map(({key,label})=><div className="weight-control" data-metric={key} key={key} style={{'--weight-color':({engagement:'#24584a',views:'#6d57a2',rating:'#a2772e',experience:'#467496'} as const)[key],'--weight-fill':Math.round(weights[key]*100)+'%'} as CSSProperties}><label htmlFor={'weight-'+key}>{label}</label><input id={'weight-'+key} type="range" min={0} max={100} step={1} value={Math.round(weights[key]*100)} aria-describedby="weight-help" aria-valuetext={Math.round(weights[key]*100)+'%'} onFocus={()=>begin(key)} onPointerDown={()=>begin(key)} onBlur={()=>{anchor.current=null;}} onChange={e=>change(key,Number(e.target.value))}/><div><input type="number" min={0} max={100} step={1} aria-label={label+' 비중 숫자'} value={Math.round(weights[key]*100)} onFocus={()=>begin(key)} onBlur={()=>{anchor.current=null;}} onChange={e=>{const n=e.target.valueAsNumber;if(Number.isInteger(n)&&n>=0&&n<=100)change(key,n);}}/><span>%</span></div></div>)}</fieldset>;
 }
 function PriorityEditor({brief,onApply,onClose}:{brief:Brief;onApply:(value:Brief)=>void;onClose:()=>void}) {
   const [draft,setDraft]=useState(brief);
@@ -60,21 +53,6 @@ function Conditions({initial,onSubmit,action='이 조건으로 찾기',onBack}:{
     <p className="muted form-note">과거 평균 비용으로 예산을 비교합니다. 실제 견적은 달라질 수 있어요.</p>
     <div className="form-actions">{onBack&&<button type="button" className="secondary-button" onClick={()=>onBack({...initial,input:{budgetKRW:parseBudget(budget),categories,sizeTier:tier}})}>이전</button>}<button className="primary-button" type="submit">{action}<Icon name="arrow" size={18}/></button></div>
   </form>;
-}
-function Onboarding({initial,onComplete,onCancel,campaignNav}:{initial?:Brief;onComplete:(brief:Brief)=>void;onCancel?:()=>void;campaignNav?:ReactNode}) {
-  const [draft,setDraft]=useState<Brief>(initial??{input:{...DEFAULT_INPUT,categories:[...DEFAULT_INPUT.categories]},priority:'reach',campaign:{...EMPTY_CAMPAIGN}});
-  const [step,setStep]=useState(1),[showAI,setShowAI]=useState(!initial);
-  const campaign=draft.campaign??{...EMPTY_CAMPAIGN,name:'나의 캠페인'};
-  const updateCampaign=(value:Campaign)=>setDraft({...draft,campaign:value});
-  const steps=['캠페인','타깃 고객','후보 조건','추천 기준'];
-  const titles=[<>어떤 제품을<br/><em>소개할까요?</em></>,<>누구의 관심을<br/><em>끌고 싶나요?</em></>,<>함께할 후보의<br/><em>조건을 정하세요.</em></>,<>후보를 고를<br/><em>기준을 정하세요.</em></>];
-  const descriptions=['제품과 목표부터 정해요.\n이를 바탕으로 협업 방향을 살펴봅니다.','고객이 제품을 선택하는 이유를 알면\n어떤 콘텐츠가 어울릴지 구체화할 수 있어요.','예산·분야·팔로워 조건에 맞는\n후보부터 모아드립니다.','가장 중요하게 보는 지표가\n추천 순서에 더 많이 반영됩니다.'];
-  return <div className="onboarding"><header className="onboarding-header"><span className="wordmark"><span className="brand-sign">c<span>m</span></span>creator match</span>{campaignNav}{onCancel&&<button className="text-button" onClick={onCancel}>변경 없이 돌아가기</button>}</header><main className="onboarding-main"><section className="welcome"><div className="step-label">캠페인 설정 <span>0{step} / 04</span></div><h1>{titles[step-1]}</h1><p>{descriptions[step-1]}</p><ol className="steps">{steps.map((label,i)=><li key={label} className={step===i+1?'current':step>i+1?'done':''}><span>{step>i+1?'✓':i+1}</span>{label}</li>)}</ol></section><section className={'setup-pane step-'+step} aria-label={steps[step-1]}>
-    {step===1?<><div className="section-heading"><h2>이번 캠페인을 알려주세요.</h2>{!showAI&&<button className="ai-button" onClick={()=>setShowAI(true)}>✦ AI로 초안 만들기</button>}</div>{showAI?<BriefBuilder initial={draft} onClose={()=>setShowAI(false)} onApply={value=>{setDraft(value);setShowAI(false);setStep(2);}}/>:<form className="brief-form" onSubmit={e=>{e.preventDefault();if(campaign.name.trim()&&campaign.product.trim())setStep(2);}}><RequiredHint/><label className="field-label"><span>캠페인명<RequiredMark/></span><input required maxLength={80} value={campaign.name} placeholder="예: 가을 립틴트 출시" onChange={e=>updateCampaign({...campaign,name:e.target.value})}/></label><label className="field-label"><span>제품과 알리고 싶은 점<RequiredMark/></span><textarea required maxLength={1500} value={campaign.product} placeholder="예: 한 번만 발라도 선명한 색이 오래가는 립틴트" onChange={e=>updateCampaign({...campaign,product:e.target.value})}/></label><fieldset className="goal-options"><legend>이번 캠페인의 목표<RequiredMark/></legend>{GOALS.map(g=><label key={g.id} className={campaign.goal===g.id?'selected':''}><input type="radio" name="goal" required checked={campaign.goal===g.id} onChange={()=>setDraft({...draft,campaign:{...campaign,goal:g.id},priority:g.priority,customWeights:undefined})}/><span><strong>{g.label}</strong><small>{g.detail}</small></span></label>)}</fieldset><div className="onboarding-actions">{!initial&&<button type="button" className="text-button" onClick={()=>onComplete({input:{...DEFAULT_INPUT,categories:[...DEFAULT_INPUT.categories]},priority:'balanced',campaign:{name:'가을 립틴트 출시',product:'한 번만 발라도 선명한 색이 오래가는 립틴트',goal:'awareness',targetCustomer:'출근 준비 시간을 줄이고 싶은 직장인',customerNeed:'routine'}})}>예시 캠페인으로 시작</button>}<button className="primary-button" type="submit">타깃 고객 정하기<Icon name="arrow" size={16}/></button></div></form>}</>
-    :step===2?<><h2>어떤 고객에게 소개하나요?</h2><p className="section-intro">아직 정하지 않았다면 다음으로 넘어가도 돼요.</p><CustomerFields value={campaign} onChange={updateCampaign}/><div className="form-actions"><button className="secondary-button" onClick={()=>setStep(1)}>이전</button><button className="primary-button" onClick={()=>setStep(3)}>후보 조건 정하기<Icon name="arrow" size={16}/></button></div></>
-    :step===3?<><h2>어떤 후보를 찾고 있나요?</h2><p className="section-intro">{campaign.name}</p><Conditions initial={draft} action="추천 기준 정하기" onSubmit={value=>{setDraft(value);setStep(4);}} onBack={value=>{setDraft(value);setStep(2);}}/></>
-    :<><h2>무엇을 더 중요하게 볼까요?</h2><p className="section-intro">기준을 고르거나 지표별 비중을 직접 조절하세요.</p><div className="preset-options" role="group" aria-label="추천 우선순위">{PRIORITIES.map(p=><button key={p.id} aria-pressed={!draft.customWeights&&draft.priority===p.id} onClick={()=>setDraft({...draft,priority:p.id,customWeights:undefined})}><Icon name={p.icon} size={16}/>{p.label}</button>)}</div><WeightControls weights={criteriaOf(draft).weights} onChange={customWeights=>setDraft({...draft,customWeights})}/><div className="setup-recap"><strong>{campaign.name}</strong><span>{draft.input.categories.join(' · ')} · 1명당 {moneyText(draft.input.budgetKRW)} · 팔로워 {tierRange(draft.input.sizeTier)}</span></div><div className="form-actions"><button className="secondary-button" onClick={()=>setStep(3)}>이전</button><button className="primary-button" onClick={()=>onComplete({...draft,campaign})}>이 조건으로 추천받기<Icon name="arrow" size={17}/></button></div></>}
-  </section></main></div>;
 }
 function Profile({creator:c,all,brief,onClose,selected,onToggle,onInquiry,onAnalysis,hasWork}:{creator:Creator;all:Creator[];brief:Brief;onClose:()=>void;selected:boolean;onToggle:()=>void;onInquiry:()=>void;onAnalysis:()=>void;hasWork:boolean}) {
   const item=scoreCreator(c,all,'cohort',criteriaOf(brief).weights),known=hasKnownBudget(c);

@@ -27,7 +27,7 @@ export function buildReview(c:Creator,all:Creator[],brief:Brief,library=getConte
   if(b.targetCustomer)questions.push(`‘${b.targetCustomer}’과 시청자의 접점을 검토할 수 있도록 최근 채널 인사이트를 공유해 주실 수 있나요?`);
   if(!d?.posts.some(p=>p.kind==='ad'))questions.push('비슷한 제품을 소개한 콘텐츠가 있다면 공유해 주실 수 있나요?');
   if(d&&/직장|출근/.test(b.targetCustomer??'')&&d.keywords.includes('파티'))questions.push('일상에서 쓰기 편한 메이크업 구성으로도 촬영할 수 있나요?');
-  else if(b.requiredElements)questions.push(`‘${b.requiredElements}’를 포함해 제작할 수 있나요?`);
+  else if(b.requiredElements)questions.push(`‘${b.requiredElements}’ 내용을 포함해 제작할 수 있나요?`);
   else questions.push(`${insights.creative.title} 방향의 제작 가능 여부와 필요한 촬영 범위를 알려주실 수 있나요?`);
   const mismatch=!!d&&/직장|출근/.test(b.targetCustomer??'')&&d.keywords.includes('파티');
   return {

@@ -15,6 +15,6 @@ export default function WorkspaceApp(){
     return JSON.stringify(before)===JSON.stringify(session)?b:saveCampaign(b,id,session);
   }),[id]);
   const add=()=>{const c=newSpace();history.replaceState(null,'',location.pathname+location.search);setBook(b=>({...b,activeId:c.id,campaigns:[...b.campaigns,c]}));};
-  const nav=<div className="campaign-switcher"><label htmlFor="active-campaign">내 캠페인 <span>{book.campaigns.length}</span></label><select id="active-campaign" value={id} onChange={e=>{history.replaceState(null,'',location.pathname+location.search);setBook(b=>({...b,activeId:e.target.value}));}}>{book.campaigns.map((c,i)=><option key={c.id} value={c.id}>{c.session?.brief.campaign?.name||`새 캠페인 ${i+1}`}</option>)}</select><button onClick={add} className="new-campaign-button">+ 새 캠페인</button>{error&&<p role="alert">브라우저 저장 공간을 확인해 주세요. 현재 작업은 이 화면에 유지됩니다.</p>}</div>;
+  const nav=<div className="campaign-switcher"><label htmlFor="active-campaign">내 캠페인 <span>{book.campaigns.length}</span></label><select aria-label="내 캠페인" id="active-campaign" value={id} onChange={e=>{history.replaceState(null,'',location.pathname+location.search);setBook(b=>({...b,activeId:e.target.value}));}}>{book.campaigns.map((c,i)=><option key={c.id} value={c.id}>{c.session?.brief.campaign?.name||`새 캠페인 ${i+1}`}</option>)}</select><button onClick={add} className="new-campaign-button">+ 새 캠페인</button>{error&&<p role="alert">브라우저 저장 공간을 확인해 주세요. 현재 작업은 이 화면에 유지됩니다.</p>}</div>;
   return <App key={id} initialSession={active.session} onSessionChange={update} campaignNav={nav}/>;
 }
