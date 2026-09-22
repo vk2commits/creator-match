@@ -1,3 +1,4 @@
+import {campaignFit} from './campaignFit';
 import {campaignOf, GOALS} from './campaign';
 import {criteriaOf} from './experience';
 import type {Brief} from './experience';
@@ -12,7 +13,7 @@ export function campaignInsights(c:Creator,all:Creator[],brief:Brief){
   const campaign=campaignOf(brief),criteria=criteriaOf(brief),score=scoreCreator(c,all,'cohort',criteria.weights);
   const components=[...score.components].filter(x=>x.weight>0).sort((a,b)=>b.points-a.points);
   const observed=components.filter(x=>!(x.key==='rating'&&c.rating===null));
-  const strongest=observed[0]??components[0],weakest=[...components].sort((a,b)=>a.normalized-b.normalized)[0];
+  const weakest=[...components].sort((a,b)=>a.normalized-b.normalized)[0];
   const known=hasKnownBudget(c),headroom=known?brief.input.budgetKRW-c.averageBudget:null;
   const within=brief.input.categories.includes(c.category)&&tierOf(c.followers)===brief.input.sizeTier;
   const product=(campaign.product||campaign.name).slice(0,180),target=campaign.targetCustomer?.trim();
@@ -25,10 +26,7 @@ export function campaignInsights(c:Creator,all:Creator[],brief:Brief){
     experience:`광고 협업 ${c.campaigns}건이 기록돼 있습니다. 제품 설명, 검수, 일정 협의가 필요한 이번 작업에서 관련 진행 사례를 요청해 보세요.`,
   };
   const goal=GOALS.find(g=>g.id===campaign.goal)!.label;
-  const pair=observed.slice(0,2).map(x=>x.key).sort().join('+');
-  const pairLead:Record<string,string>={'rating+views':'조회 규모와 협업 평가를 함께 볼 후보예요','engagement+rating':'콘텐츠 반응과 협업 평가를 함께 볼 후보예요','engagement+views':'조회수와 참여율을 함께 볼 후보예요','experience+rating':'협업 경험과 광고주 평가를 함께 볼 후보예요','experience+views':'조회 규모와 협업 경험을 함께 볼 후보예요','engagement+experience':'콘텐츠 반응과 협업 경험을 함께 볼 후보예요'};
-  const lead=!within?'지금의 탐색 조건과 다른 후보예요':headroom!==null&&headroom<0?'예산을 조율해야 진행할 수 있어요':!known?'협업 방향을 먼저 잡고 견적을 받아보세요':pairLead[pair]??(strongest.key==='views'?'제품을 소개할 접점을 먼저 볼 후보예요':strongest.key==='engagement'?'콘텐츠에 대한 반응을 먼저 볼 후보예요':strongest.key==='rating'?'광고주의 협업 평가가 눈에 띄는 후보예요':'협업 경험을 먼저 검토할 후보예요');
-  const summary=c.rating===null&&strongest.key==='rating'?'광고주 평점을 우선하는 기준이지만, 이 후보는 아직 평가가 없어요. 채널 지표와 제작 조건을 먼저 살펴본 뒤 비교해 보세요.':`선택한 ‘${criteria.label}’ 기준에서 먼저 눈여겨볼 지표는 ${strongest.label} ${values[strongest.key]}입니다. ${goal} 캠페인에서는 ${campaign.goal==='sales'?'아래 콘텐츠 제안에 구매 링크나 전용 코드를 연결해 반응부터 구매까지 확인해 보세요.':campaign.goal==='engagement'?'제품에 관한 질문을 콘텐츠에 넣고 댓글·저장 반응을 확인해 보세요.':'제품을 알리는 핵심 장면을 앞부분에 배치하는 방향을 제안해요.'}`;
+  const fit=campaignFit(c,all,brief),lead=fit.headline,summary=fit.paragraph;
   const budget={title:!known?'먼저 견적을 받아야 해요':headroom!<0?'현재 예산보다 '+moneyText(-headroom!)+' 높아요':headroom===0?'과거 평균 비용과 예산이 같아요':moneyText(headroom!)+'의 조율 여지가 있어요',body:!known?'기록된 협업 비용이 없어 예산 안에서 가능한지 아직 판단할 수 없어요. 콘텐츠 형식과 수량을 정해 문의해 보세요.':`과거 평균 협업비 ${moneyText(c.averageBudget)}을 1명당 예산 ${moneyText(brief.input.budgetKRW)}과 비교했어요. ${headroom!>0?'추가 촬영이나 사용권 비용을 포함할 수 있는지 확인해 보세요.':'제작 범위·부가세·사용권을 포함한 최종 견적을 먼저 확인해 보세요.'}`};
   let creative=campaign.customerNeed==='proof'?{
     title:'궁금한 점에 답하는 비교 콘텐츠',hook:target?`‘${target}’인 고객이 제품을 고를 때 망설이는 지점 한 가지로 시작해 보세요.`:'제품 선택을 망설이게 하는 질문 한 가지로 시작해 보세요.',scene:`「${product}」에서 전달하려는 장점을 직접 보여주고, 사용 조건·차이점을 같은 화면에서 비교하는 구성을 제안해요.`
@@ -37,7 +35,7 @@ export function campaignInsights(c:Creator,all:Creator[],brief:Brief){
   }:{title:'고객의 일상에 제품을 넣는 콘텐츠',hook:target?`${target}의 하루에서 제품이 필요한 순간으로 시작해 보세요.`:'제품이 필요한 생활 장면을 먼저 보여주세요.',scene:`「${product}」를 사용하는 전후 과정을 보여주고, 제품 설명을 그 장면 안에 자연스럽게 넣는 구성을 제안해요.`};
   // Product-specific creative examples remain proposals, never observed creator posts.
   if(/틴트|립스틱/.test(product)&&c.category==='패션')creative={
-    title:campaign.customerNeed==='proof'?'같은 옷, 다른 립 컬러 비교':'출근 룩을 완성하는 립 컬러',
+    title:campaign.customerNeed==='proof'?'같은 옷, 다른 립 컬러 비교':/출근|직장/.test(target??'')?'출근 룩을 완성하는 립 컬러':'오늘의 룩을 완성하는 립 컬러',
     hook:target?`‘${target}’에게 익숙한 옷차림을 고르는 장면으로 시작해 보세요.`:'옷차림을 고른 뒤 메이크업을 마무리하는 장면으로 시작해 보세요.',
     scene:campaign.customerNeed==='proof'?'같은 옷과 조명에서 립 컬러 두 가지를 비교해 보세요. 색상 차이와 전체적인 인상을 보여주고, 제품의 실제 발색을 자막으로 짚어주는 구성을 제안해요.':'흰 셔츠와 니트처럼 일상적인 룩 두 가지에 제품을 매치해 보세요. 바르는 과정과 완성된 룩을 연결하면 패션 콘텐츠 안에서도 립 제품의 쓰임을 보여줄 수 있어요.'
   };
