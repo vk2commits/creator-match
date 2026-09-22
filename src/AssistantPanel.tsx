@@ -21,11 +21,11 @@ export function AssistantPanel({mode,context,onApply}:{mode:AssistantMode;contex
     }
     setPending(false);
   },900);};
-  return <section className="assistant-panel"><div className="assistant-heading"><span className="ai-symbol">✦</span><div><h3>{analysis?'숫자를 팀에 설명할 한 문단으로':'첫 문의, 보낼 문장으로 다듬기'}</h3><p>{analysis?'입력한 조회수와 집행비를 읽기 쉽게 정리합니다.':'제품·예산·제작 조건을 가져왔어요. 원하는 말투를 골라주세요.'}</p></div><span className="ai-state">AI 시연</span></div>
+  return <section className="assistant-panel"><div className="assistant-heading"><span className="ai-symbol">✦</span><div><h3>{analysis?'협업 결과를 한 문단으로 정리하세요':'문의 문안을 다듬어 보세요'}</h3><p>{analysis?'입력한 조회수와 집행비를 읽기 쉽게 정리합니다.':'제품·예산·제작 조건을 가져왔어요. 원하는 말투를 골라주세요.'}</p></div><span className="ai-state">AI 시연</span></div>
     {!analysis&&<div className="preset-options" aria-label="문의 문안 말투">{['정중하게','짧게'].map(t=><button key={t} aria-pressed={tone===t} onClick={()=>setTone(t)}>{t}</button>)}</div>}
     {!result&&<button className="ai-button" disabled={pending} onClick={generate}>{pending?'내용을 정리하고 있어요…':analysis?'✦ 결과 요약 만들기':'✦ 문의 초안 만들기'}</button>}
     {pending&&<div className="ai-pending" role="status"><span className="spinner"/>{analysis?'성과 기록을 읽기 쉬운 문장으로 바꾸고 있어요.':'선택한 말투로 문의 내용을 정리하고 있어요.'}</div>}
-    {result&&<div className="ai-result"><label className="field-label">{analysis?'팀 공유용 요약':'보낼 문안 확인'}<textarea value={result} onChange={e=>setResult(e.target.value)}/></label><div className="form-actions"><button className="text-button" onClick={generate}>다시 만들기</button>{onApply?<button className="primary-button" onClick={()=>onApply(result)} disabled={!result.trim()}>이 문안 사용하기<Icon name="check" size={16}/></button>:<button className="primary-button" onClick={async()=>{try{await navigator.clipboard.writeText(result);setStatus('요약을 복사했어요. 팀 문서에 붙여 넣어보세요.');}catch{setStatus('문장을 선택해서 복사해 주세요.');}}}>요약 복사하기</button>}</div></div>}
+    {result&&<div className="ai-result"><label className="field-label">{analysis?'성과 요약':'보낼 문안 확인'}<textarea value={result} onChange={e=>setResult(e.target.value)}/></label><div className="form-actions"><button className="text-button" onClick={generate}>다시 만들기</button>{onApply?<button className="primary-button" onClick={()=>onApply(result)} disabled={!result.trim()}>이 문안 사용하기<Icon name="check" size={16}/></button>:<button className="primary-button" onClick={async()=>{try{await navigator.clipboard.writeText(result);setStatus('요약을 복사했습니다.');}catch{setStatus('문장을 선택해서 복사해 주세요.');}}}>요약 복사하기</button>}</div></div>}
     <p role="status">{status}</p><p className="assistant-demo-foot">AI 기능 체험용 예시입니다. 입력한 정보로 초안을 만들며, 적용 전에 수정할 수 있어요.</p>
   </section>;
 }

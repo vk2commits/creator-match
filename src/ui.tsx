@@ -4,6 +4,7 @@ import type {Creator} from './domain';
 import {numberText} from './policy';
 export function Icon({name,size=20}:{name:string;size?:number}) {
   const paths:Record<string,ReactNode> = {
+    send:<><path d="m3 3 18 9-18 9 4-9-4-9Z"/><path d="M7 12h14"/></>,
     search:<><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4.5 4.5"/></>,
     reaction:<><path d="M12 20S3 14.5 3 8.5a4.5 4.5 0 0 1 9-1 4.5 4.5 0 0 1 9 1C21 14.5 12 20 12 20Z"/></>,
     views:<><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></>,

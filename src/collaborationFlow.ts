@@ -1,3 +1,4 @@
+import {sentHistoryOf} from './sentHistory';
 import {hasOutcome,workErrors} from './campaign';
 import type {Stage,WorkRecord} from './campaign';
 
@@ -29,7 +30,15 @@ export function stageNeeds(w:WorkRecord):string[]{
 }
 export function simulateSend(record:WorkRecord,message:string,now:string):WorkRecord{
   if(!message.trim())throw new Error('보낼 문의 문안을 입력해 주세요.');
-  const next={...record,stage:'contacted' as const,message,sentMessage:message,demoSentAt:now};
+  const history=sentHistoryOf(record);
+  const next={...record,stage:record.stage==='draft'?'contacted' as const:record.stage,message,sentMessage:message,demoSentAt:now,sentHistory:[...history,{id:now+'-'+history.length,kind:'demo' as const,sentAt:now,message}]};
   const errors=workErrors(next);if(errors.length)throw new Error(errors.join(' '));
   return next;
+}
+
+export function recordExternalInquiry(record:WorkRecord,message:string,previous:WorkRecord=record):WorkRecord{
+  if(!record.contactedAt)throw new Error('실제로 문의한 날짜를 입력해 주세요.');
+  const history=sentHistoryOf(previous);
+  const next={...record,stage:'contacted' as const,sentMessage:message,sentHistory:[...history,{id:'manual-'+record.contactedAt+'-'+history.length,kind:'manual' as const,sentAt:record.contactedAt,message}]};
+  const errors=workErrors(next);if(errors.length)throw new Error(errors.join(' '));return next;
 }

@@ -17,10 +17,11 @@ export type Stage=typeof STAGES[number]['id'];
 export const METRICS=[{key:'views',label:'조회수',unit:'회'},{key:'likes',label:'좋아요',unit:'개'},{key:'comments',label:'댓글',unit:'개'},{key:'shares',label:'공유',unit:'회'},{key:'saves',label:'저장',unit:'회'},{key:'clicks',label:'링크 클릭',unit:'회'},{key:'conversions',label:'구매',unit:'건'},{key:'revenue',label:'연결 매출',unit:'원'}] as const;
 export type Metric=typeof METRICS[number]['key'];
 export type Outcome={cost:number|null;measuredAt:string;source:string;contentUrl:string;attribution:string}&Record<Metric,number|null>;
-export type WorkRecord={stage:Stage;email:string;channelUrl:string;deliverable:string;dueDate:string;rights:string;agreedCost:number|null;quotedCost:number|null;contactedAt:string;demoSentAt:string;sentMessage:string;closedReason:string;memo:string;message:string;outcome:Outcome};
+export type SentInquiry={id:string;kind:'demo'|'manual';sentAt:string;message:string};
+export type WorkRecord={stage:Stage;email:string;channelUrl:string;deliverable:string;dueDate:string;rights:string;agreedCost:number|null;quotedCost:number|null;contactedAt:string;demoSentAt:string;sentMessage:string;sentHistory:SentInquiry[];closedReason:string;memo:string;message:string;outcome:Outcome};
 export type WorkRecords=Record<string,WorkRecord>;
 export const emptyOutcome=():Outcome=>({cost:null,measuredAt:'',source:'',contentUrl:'',attribution:'',views:null,likes:null,comments:null,shares:null,saves:null,clicks:null,conversions:null,revenue:null});
-export const emptyWork=():WorkRecord=>({stage:'draft',email:'',channelUrl:'',deliverable:'',dueDate:'',rights:'',agreedCost:null,quotedCost:null,contactedAt:'',demoSentAt:'',sentMessage:'',closedReason:'',memo:'',message:'',outcome:emptyOutcome()});
+export const emptyWork=():WorkRecord=>({stage:'draft',email:'',channelUrl:'',deliverable:'',dueDate:'',rights:'',agreedCost:null,quotedCost:null,contactedAt:'',demoSentAt:'',sentMessage:'',sentHistory:[],closedReason:'',memo:'',message:'',outcome:emptyOutcome()});
 export function safeUrl(value:string):boolean {try{const u=new URL(value);return ['https:','http:'].includes(u.protocol)&&!u.username&&!u.password;}catch{return false;}}
 export const validNumber=(value:unknown):value is number=>typeof value==='number'&&Number.isSafeInteger(value)&&value>=0;
 export function parseMetric(value:string):number|null {if(!value.trim())return null;const n=Number(value.replaceAll(',',''));return validNumber(n)&&/^[\d,]+$/.test(value)?n:NaN;}
@@ -74,6 +75,9 @@ export function readWork(raw:unknown):WorkRecords {
     if(!STAGES.some(s=>s.id===w.stage))continue;
     const strings=['email','channelUrl','deliverable','dueDate','rights','contactedAt','demoSentAt','sentMessage','closedReason','memo','message'] as const;
     if(strings.some(k=>typeof w[k]!=='string')||['measuredAt','source','contentUrl','attribution'].some(k=>typeof w.outcome[k as keyof Outcome]!=='string'))continue;
+    if(!('sentHistory' in value))w.sentHistory=w.demoSentAt?[{id:'legacy-demo',kind:'demo',sentAt:w.demoSentAt,message:w.sentMessage}]:w.contactedAt?[{id:'legacy-manual',kind:'manual',sentAt:w.contactedAt,message:w.sentMessage}]:[];
+    if(!Array.isArray(w.sentHistory))w.sentHistory=[];
+    w.sentHistory=w.sentHistory.filter(s=>s&&typeof s.id==='string'&&['demo','manual'].includes(s.kind)&&typeof s.sentAt==='string'&&typeof s.message==='string'&&(s.kind==='manual'?validDate(s.sentAt):Number.isFinite(Date.parse(s.sentAt)))).map(s=>({...s,message:s.message.slice(0,12000)}));
     if(workErrors(w).length)continue;
     for(const k of strings)w[k]=w[k].slice(0,['message','sentMessage'].includes(k)?12000:2000);
     result[id]=w;

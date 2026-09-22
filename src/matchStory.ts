@@ -38,7 +38,7 @@ export function matchStory(item:ScoredCreator,brief:Brief){
   const title=key==='views'?(high?'조회 실적이 돋보이는 후보':'조회수와 비용을 함께 비교할 후보'):key==='engagement'?(high?'콘텐츠 반응이 돋보이는 후보':'최근 반응을 더 살펴볼 후보'):key==='rating'?(c.rating!==null&&high?'이전 광고주의 평가가 좋은 후보':'이전 협업 사례를 확인할 후보'):'광고 협업 경험을 살펴볼 후보';
   const budget=!hasKnownBudget(c)?'협업비를 문의한 뒤 예산에 맞는지 확인하세요.':c.averageBudget<=brief.input.budgetKRW?`참고 협업비 ${moneyText(c.averageBudget)}으로, 1명당 예산 ${moneyText(brief.input.budgetKRW)} 안에서 검토할 수 있어요.`:`참고 협업비가 현재 예산보다 ${moneyText(c.averageBudget-brief.input.budgetKRW)} 높아요.`;
   const weak=[...active].filter(x=>x.key!==key&&x.normalized<50&&!(x.key==='rating'&&c.rating===null)).sort((a,b)=>b.weight-a.weight)[0];
-  const next=c.rating===null?'이전 협업 사례와 작업 방식을 문의해 보세요.':weak?.key==='engagement'?'참여율은 상대적으로 낮아요. 최근 댓글이 제품에 대한 관심으로 이어지는지 살펴보세요.':weak?.key==='views'?'조회수는 상대적으로 낮아요. 노출 규모가 충분한지 다른 후보와 비교해 보세요.':'최근 콘텐츠를 보고 제품의 표현 방식이 브랜드와 어울리는지 확인하세요.';
+  const next=c.rating===null?'이전 협업 사례와 작업 방식을 문의해 보세요.':weak?.key==='engagement'?'참여율은 상대적으로 낮아요. 최근 댓글이 제품에 대한 관심으로 이어지는지 살펴보세요.':weak?.key==='views'?'조회수는 상대적으로 낮아요. 노출 규모가 충분한지 다른 후보와 비교해 보세요.':'';
   const eligible=status==='조건 충족';
   return {key,title:eligible?title:status==='비용 미확인'?'견적을 먼저 확인할 후보':status,summary,budget,next,category:brief.input.categories.includes(c.category)?`찾고 있는 ${c.category} 분야의 크리에이터예요.`:`현재 선택한 분야와 다른 ${c.category} 크리에이터예요.`,eligible,
     memo:`${c.category} 분야 후보. ${summary} ${budget}`,
