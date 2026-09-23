@@ -4,6 +4,8 @@
 
 ## 현재 판단의 근거
 
+- [화면·데이터·개발 상세 명세](PRODUCT_SPEC.md): PRD의 스토리를 S00–S10 화면 및 AC01–AC13 수용 기준으로 구현하는 계약. 과거 기록이 아닌 현행 명세입니다.
+
 - [요구사항 추적표](REQUIREMENTS.md) · [실제 검증과 한계](QA.md)
 - [원본 데이터 감사](DATA_AUDIT.md)
 - [A/B/C 비교](EVALUATION.md) · [우선순위 비교](PRIORITY_EVALUATION.md) · [민감도·반례](LOGIC_REVIEW.md)
